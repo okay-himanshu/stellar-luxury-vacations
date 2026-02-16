@@ -61,7 +61,7 @@ const activities = [
   },
 ];
 
-export default function ArcCarousel() {
+export default function ActivitiesSlider() {
   const [activeIndex, setActiveIndex] = useState(0);
   const [direction, setDirection] = useState(1); // 1 = next, -1 = prev
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);

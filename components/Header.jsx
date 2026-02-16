@@ -1,8 +1,17 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 
 export default function Header() {
+  // Data for Left Navigation
+  const leftNavItems = [
+    { name: "Home", path: "/" },
+    { name: "About Us", path: "/about" },
+    { name: "Activities", path: "/activities" },
+    { name: "Travel Desk", path: "/travel-desk" },
+  ];
+
   return (
     <nav
       className="w-full h-20 fixed top-0 left-0 z-50 flex items-center justify-between px-10
@@ -10,22 +19,22 @@ export default function Header() {
     >
       {/* ── Left Nav ── */}
       <ul className="flex items-center gap-9 list-none m-0 p-0">
-        {["Home", "About Us", "Activities", "Travel Desk"].map((item) => (
-          <li key={item}>
-            <a
-              href="#"
+        {leftNavItems.map((item) => (
+          <li key={item.name}>
+            <Link
+              href={item.path}
               className="text-white text-sm font-medium tracking-wide
                          hover:text-[#c9a84c] transition-colors duration-200"
             >
-              {item}
-            </a>
+              {item.name}
+            </Link>
           </li>
         ))}
       </ul>
 
       {/* ── Center Logo (absolutely centered) ── */}
-      <a
-        href="#"
+      <Link
+        href="/"
         className="absolute left-1/2 -translate-x-1/2 flex flex-col items-center
                    no-underline group"
       >
@@ -37,18 +46,18 @@ export default function Header() {
           className="object-contain group-hover:scale-105 transition-transform duration-300"
           priority
         />
-      </a>
+      </Link>
 
       {/* ── Right Nav ── */}
       <ul className="flex items-center gap-8 list-none m-0 p-0">
         <li>
-          <a
-            href="#"
+          <Link
+            href="/membership"
             className="text-white text-sm font-medium tracking-wide
                        hover:text-[#c9a84c] transition-colors duration-200"
           >
             Membership
-          </a>
+          </Link>
         </li>
         <li>
           <span
@@ -67,13 +76,13 @@ export default function Header() {
           </span>
         </li>
         <li>
-          <a
-            href="#"
+          <Link
+            href="/login"
             className="text-white text-sm font-bold tracking-wide
                        hover:text-[#c9a84c] transition-colors duration-200"
           >
             Login
-          </a>
+          </Link>
         </li>
       </ul>
     </nav>
