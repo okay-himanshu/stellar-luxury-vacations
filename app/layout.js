@@ -1,7 +1,9 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import Header from "../components/Header";
-import Footer from "../components/Footer";
+
+import LayoutWrapper from "../components/LayoutWrapper";
+// 1. Yahan AuthProvider import karo (Path apne folder ke hisaab se check kar lena)
+import { AuthProvider } from "../context/auth-context";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -24,9 +26,10 @@ export default function RootLayout({ children }) {
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <Header />
-        {children}
-        <Footer />
+        {/* 2. Poori app ko AuthProvider ke andar WRAP kar do */}
+        <AuthProvider>
+          <LayoutWrapper>{children}</LayoutWrapper>
+        </AuthProvider>
       </body>
     </html>
   );
