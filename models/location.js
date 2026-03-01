@@ -22,12 +22,19 @@ const CitySchema = new mongoose.Schema(
       ref: "Country",
       required: true,
     },
+    regionType: [
+      {
+        type: String,
+        enum: ["India", "International", "International Exchange"],
+        required: true,
+      }
+    ],
   },
   { timestamps: true },
 );
 
-
 CitySchema.index({ countryId: 1 });
+CitySchema.index({ regionType: 1 });
 
 export const Country =
   mongoose.models.Country || mongoose.model("Country", CountrySchema);

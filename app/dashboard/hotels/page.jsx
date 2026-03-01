@@ -65,11 +65,32 @@ export default function HotelsDashboard() {
       ]);
 
       if (resHotels.data.success) {
-        setHotels(resHotels.data.data.items);
-        setTotalPages(resHotels.data.data.totalPages);
+        // Fix: Checking if the array is directly inside data or inside data.items
+        const hotelData = Array.isArray(resHotels.data.data)
+          ? resHotels.data.data
+          : resHotels.data.data.items;
+
+        setHotels(hotelData || []);
+
+        // Handling total pages dynamically if missing in new response structure
+        setTotalPages(
+          resHotels.data.totalPages || resHotels.data.data.totalPages || 1,
+        );
       }
-      if (resCountries.data.success) setCountries(resCountries.data.data.items);
-      if (resCities.data.success) setCities(resCities.data.data.items);
+
+      if (resCountries.data.success) {
+        const countryData = Array.isArray(resCountries.data.data)
+          ? resCountries.data.data
+          : resCountries.data.data.items;
+        setCountries(countryData || []);
+      }
+
+      if (resCities.data.success) {
+        const cityData = Array.isArray(resCities.data.data)
+          ? resCities.data.data
+          : resCities.data.data.items;
+        setCities(cityData || []);
+      }
     } catch (err) {
       setError("Failed to load data.");
     } finally {
@@ -82,7 +103,9 @@ export default function HotelsDashboard() {
   }, [currentPage]);
 
   const filteredCities = cities.filter(
-    (c) => c.countryId?._id === formData.countryId,
+    (c) =>
+      c.countryId?._id === formData.countryId ||
+      c.countryId === formData.countryId,
   );
 
   // --- HANDLERS ---
@@ -223,14 +246,14 @@ export default function HotelsDashboard() {
             </tr>
           </thead>
           <tbody className="text-gray-300 divide-y divide-gray-800">
-            {hotels.length === 0 && (
+            {hotels?.length === 0 && (
               <tr>
                 <td colSpan="4" className="p-8 text-center text-gray-500">
                   No hotels added yet.
                 </td>
               </tr>
             )}
-            {hotels.map((hotel) => (
+            {hotels?.map((hotel) => (
               <tr key={hotel._id} className="hover:bg-gray-800/30">
                 <td className="p-4">
                   {hotel.images && hotel.images.length > 0 ? (

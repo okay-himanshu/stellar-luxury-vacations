@@ -9,30 +9,29 @@ import {
   X,
   ChevronLeft,
   ChevronRight,
+  Edit2,
+  ChevronDown,
 } from "lucide-react";
 
 export default function LocationsDashboard() {
-  // Global States
-  const [activeTab, setActiveTab] = useState("countries"); // "countries" or "cities"
+  const [activeTab, setActiveTab] = useState("countries");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
 
-  // Country States
   const [countries, setCountries] = useState([]);
   const [countryPage, setCountryPage] = useState(1);
   const [countryTotalPages, setCountryTotalPages] = useState(1);
   const [isCountryModalOpen, setIsCountryModalOpen] = useState(false);
 
-  // City States
   const [cities, setCities] = useState([]);
   const [cityPage, setCityPage] = useState(1);
   const [cityTotalPages, setCityTotalPages] = useState(1);
   const [isCityModalOpen, setIsCityModalOpen] = useState(false);
+  const [cityToEdit, setCityToEdit] = useState(null);
   const [allCountriesForDropdown, setAllCountriesForDropdown] = useState([]);
 
   const ITEMS_PER_PAGE = 5;
 
-  // --- DATA FETCHING ---
   const fetchCountries = async (page = 1) => {
     try {
       const res = await axios.get(
@@ -90,19 +89,16 @@ export default function LocationsDashboard() {
 
   return (
     <div className="max-w-5xl mx-auto space-y-6 p-6">
-      {/* HEADER */}
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold text-white">Locations Management</h1>
       </div>
 
-      {/* ERROR ALERT */}
       {error && (
         <div className="bg-red-900/30 border border-red-500 text-red-400 p-4 rounded-lg flex items-center gap-2">
           <AlertCircle size={20} /> {error}
         </div>
       )}
 
-      {/* TABS NAVIGATION */}
       <div className="flex border-b border-gray-800">
         <button
           onClick={() => setActiveTab("countries")}
@@ -133,12 +129,8 @@ export default function LocationsDashboard() {
         </button>
       </div>
 
-      {/* =========================================
-          TAB 1: COUNTRIES CONTENT
-          ========================================= */}
       {activeTab === "countries" && (
         <div className="bg-[#1c1c1c] border border-gray-800 rounded-xl overflow-hidden flex flex-col">
-          {/* Action Bar */}
           <div className="p-4 border-b border-gray-800 flex justify-between items-center bg-[#111]">
             <p className="text-gray-400 text-sm">
               Manage all operating countries.
@@ -151,7 +143,6 @@ export default function LocationsDashboard() {
             </button>
           </div>
 
-          {/* Table */}
           <div className="overflow-x-auto min-h-[350px]">
             <table className="w-full text-left border-collapse">
               <thead>
@@ -210,7 +201,6 @@ export default function LocationsDashboard() {
             </table>
           </div>
 
-          {/* Pagination for Countries */}
           <Pagination
             currentPage={countryPage}
             totalPages={countryTotalPages}
@@ -219,25 +209,23 @@ export default function LocationsDashboard() {
         </div>
       )}
 
-      {/* =========================================
-          TAB 2: CITIES CONTENT
-          ========================================= */}
       {activeTab === "cities" && (
         <div className="bg-[#1c1c1c] border border-gray-800 rounded-xl overflow-hidden flex flex-col">
-          {/* Action Bar */}
           <div className="p-4 border-b border-gray-800 flex justify-between items-center bg-[#111]">
             <p className="text-gray-400 text-sm">
               Manage all cities under their respective countries.
             </p>
             <button
-              onClick={() => setIsCityModalOpen(true)}
+              onClick={() => {
+                setCityToEdit(null);
+                setIsCityModalOpen(true);
+              }}
               className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-blue-500 transition text-sm"
             >
               <Plus size={16} /> Add City
             </button>
           </div>
 
-          {/* Table */}
           <div className="overflow-x-auto min-h-[350px]">
             <table className="w-full text-left border-collapse">
               <thead>
@@ -248,6 +236,9 @@ export default function LocationsDashboard() {
                   <th className="p-4 font-medium border-b border-gray-800">
                     Linked Country
                   </th>
+                  <th className="p-4 font-medium border-b border-gray-800">
+                    Region Types
+                  </th>
                   <th className="p-4 font-medium border-b border-gray-800 text-right">
                     Actions
                   </th>
@@ -256,7 +247,7 @@ export default function LocationsDashboard() {
               <tbody className="text-gray-300 divide-y divide-gray-800">
                 {cities.length === 0 && (
                   <tr>
-                    <td colSpan="3" className="p-8 text-center text-gray-500">
+                    <td colSpan="4" className="p-8 text-center text-gray-500">
                       No cities found. Add one to get started.
                     </td>
                   </tr>
@@ -272,22 +263,33 @@ export default function LocationsDashboard() {
                         {city.countryId?.name || "Unassigned"}
                       </span>
                     </td>
+                    <td className="p-4 text-gray-400">
+                      <div className="flex flex-wrap gap-1">
+                        {city.regionType && city.regionType.length > 0 ? (
+                          city.regionType.map((rt, idx) => (
+                            <span
+                              key={idx}
+                              className="bg-gray-700 px-2 py-1 rounded text-[10px] uppercase"
+                            >
+                              {rt}
+                            </span>
+                          ))
+                        ) : (
+                          <span className="text-gray-600 text-xs">
+                            Unassigned
+                          </span>
+                        )}
+                      </div>
+                    </td>
                     <td className="p-4 text-right">
                       <button
-                        onClick={async () => {
-                          if (!confirm("Delete this city?")) return;
-                          try {
-                            await axios.delete(`/api/cities`, {
-                              params: { id: city._id },
-                            });
-                            fetchCities(cityPage);
-                          } catch (err) {
-                            setError("Error deleting city");
-                          }
+                        onClick={() => {
+                          setCityToEdit(city);
+                          setIsCityModalOpen(true);
                         }}
-                        className="text-gray-500 hover:text-red-500 p-2 rounded-lg hover:bg-red-500/10 transition"
+                        className="text-gray-500 hover:text-blue-500 p-2 rounded-lg hover:bg-blue-500/10 transition"
                       >
-                        <Trash2 size={18} />
+                        <Edit2 size={18} />
                       </button>
                     </td>
                   </tr>
@@ -296,7 +298,6 @@ export default function LocationsDashboard() {
             </table>
           </div>
 
-          {/* Pagination for Cities */}
           <Pagination
             currentPage={cityPage}
             totalPages={cityTotalPages}
@@ -305,9 +306,6 @@ export default function LocationsDashboard() {
         </div>
       )}
 
-      {/* =========================================
-          MODALS
-          ========================================= */}
       {isCountryModalOpen && (
         <AddCountryModal
           onClose={() => setIsCountryModalOpen(false)}
@@ -320,12 +318,17 @@ export default function LocationsDashboard() {
       )}
 
       {isCityModalOpen && (
-        <AddCityModal
+        <CityModal
           countries={allCountriesForDropdown}
-          onClose={() => setIsCityModalOpen(false)}
+          cityToEdit={cityToEdit}
+          onClose={() => {
+            setIsCityModalOpen(false);
+            setCityToEdit(null);
+          }}
           onSuccess={() => {
             fetchCities(cityPage);
             setIsCityModalOpen(false);
+            setCityToEdit(null);
           }}
         />
       )}
@@ -333,11 +336,6 @@ export default function LocationsDashboard() {
   );
 }
 
-// ==========================================
-// REUSABLE COMPONENTS
-// ==========================================
-
-// Frontend Pagination Component (Visually attached to the bottom of the table)
 function Pagination({ currentPage, totalPages, onPageChange }) {
   if (totalPages <= 1) return null;
 
@@ -367,7 +365,6 @@ function Pagination({ currentPage, totalPages, onPageChange }) {
   );
 }
 
-// Add Country Modal
 function AddCountryModal({ onClose, onSuccess }) {
   const [name, setName] = useState("");
   const [code, setCode] = useState("");
@@ -444,22 +441,54 @@ function AddCountryModal({ onClose, onSuccess }) {
   );
 }
 
-// Add City Modal
-function AddCityModal({ countries, onClose, onSuccess }) {
-  const [name, setName] = useState("");
-  const [countryId, setCountryId] = useState("");
+function CityModal({ countries, cityToEdit, onClose, onSuccess }) {
+  const [name, setName] = useState(cityToEdit?.name || "");
+  const [countryId, setCountryId] = useState(cityToEdit?.countryId?._id || "");
+  const [regionType, setRegionType] = useState(cityToEdit?.regionType || []);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState("");
 
+  const regionOptions = ["India", "International", "International Exchange"];
+
+  const toggleRegion = (option) => {
+    if (regionType.includes(option)) {
+      setRegionType(regionType.filter((r) => r !== option));
+    } else {
+      setRegionType([...regionType, option]);
+    }
+  };
+
   const submit = async (e) => {
     e.preventDefault();
+    if (regionType.length === 0) {
+      setErr("Please select at least one Region Type.");
+      return;
+    }
+
     setLoading(true);
     setErr("");
     try {
-      const res = await axios.post("/api/cities", { name, countryId });
-      if (res.data.success) onSuccess();
+      if (cityToEdit) {
+        const res = await axios.put(`/api/cities?id=${cityToEdit._id}`, {
+          name,
+          countryId,
+          regionType,
+        });
+        if (res.data.success) onSuccess();
+      } else {
+        const res = await axios.post("/api/cities", {
+          name,
+          countryId,
+          regionType,
+        });
+        if (res.data.success) onSuccess();
+      }
     } catch (error) {
-      setErr(error.response?.data?.error || "Error adding city");
+      setErr(
+        error.response?.data?.error ||
+          `Error ${cityToEdit ? "updating" : "adding"} city`,
+      );
     } finally {
       setLoading(false);
     }
@@ -474,7 +503,9 @@ function AddCityModal({ countries, onClose, onSuccess }) {
         >
           <X size={20} />
         </button>
-        <h2 className="text-xl font-bold text-white mb-6">Add New City</h2>
+        <h2 className="text-xl font-bold text-white mb-6">
+          {cityToEdit ? "Edit City" : "Add New City"}
+        </h2>
 
         {err && (
           <div className="mb-4 text-red-400 text-sm bg-red-900/20 p-3 rounded">
@@ -503,6 +534,60 @@ function AddCityModal({ countries, onClose, onSuccess }) {
               ))}
             </select>
           </div>
+
+          <div className="relative">
+            <label className="block text-gray-400 text-sm mb-2">
+              Region Type
+            </label>
+            <div
+              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+              className="w-full bg-[#111] border border-gray-700 p-3 rounded focus:border-blue-400 outline-none cursor-pointer flex justify-between items-center"
+            >
+              <span
+                className={
+                  regionType.length === 0 ? "text-gray-500" : "text-white"
+                }
+              >
+                {regionType.length > 0
+                  ? regionType.join(", ")
+                  : "-- Select Region Types --"}
+              </span>
+              <ChevronDown
+                size={18}
+                className={`text-gray-400 transition-transform ${
+                  isDropdownOpen ? "rotate-180" : ""
+                }`}
+              />
+            </div>
+
+            {isDropdownOpen && (
+              <div className="absolute z-50 w-full mt-1 bg-[#1c1c1c] border border-gray-700 rounded shadow-xl overflow-hidden">
+                {regionOptions.map((option) => (
+                  <div
+                    key={option}
+                    onClick={() => toggleRegion(option)}
+                    className="px-4 py-3 hover:bg-gray-800 cursor-pointer flex items-center gap-3 transition-colors"
+                  >
+                    <div className="w-4 h-4 border border-gray-500 rounded-sm flex items-center justify-center">
+                      {regionType.includes(option) && (
+                        <div className="w-2 h-2 bg-blue-500 rounded-sm"></div>
+                      )}
+                    </div>
+                    <span
+                      className={`text-sm ${
+                        regionType.includes(option)
+                          ? "text-white font-medium"
+                          : "text-gray-400"
+                      }`}
+                    >
+                      {option}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
           <div>
             <label className="block text-gray-400 text-sm mb-2">
               City Name
@@ -520,7 +605,7 @@ function AddCityModal({ countries, onClose, onSuccess }) {
             disabled={loading}
             className="w-full bg-blue-600 text-white font-bold py-3 rounded hover:bg-blue-500 disabled:opacity-50 mt-4 transition"
           >
-            {loading ? "Saving..." : "Save City"}
+            {loading ? "Saving..." : cityToEdit ? "Update City" : "Save City"}
           </button>
         </form>
       </div>
