@@ -55,7 +55,7 @@ export default function TravelAssociates({ shoudlShowVideos = true }) {
       <div className="max-w-[1400px] mx-auto">
         {/* --- HEADER --- */}
         <div className="text-center mb-16">
-          <h2 className="text-white font-bold text-4xl md:text-5xl mb-6">
+          <h2 className="text-white font-bold text-4xl md:text-5xl mb-6 mt-20">
             Our Travel Associates
           </h2>
           <p className="text-gray-400 max-w-3xl mx-auto text-sm md:text-base leading-relaxed">

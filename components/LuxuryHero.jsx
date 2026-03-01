@@ -7,12 +7,12 @@ export default function LuxuryHeroSection() {
     <section className="w-full  bg-black flex items-center">
       <div className="max-w-7xl mx-auto w-full px-6 lg:px-12 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
         {/* LEFT CONTENT */}
-        <div className="text-white space-y-3">
+        <div className="text-white space-y-5 ">
           {/* Logo */}
           <div>
             <Image
-              src="/images/logo.png" // 🔥 Replace with your logo path
-              alt="Royal Savoy Holidays"
+              src="/images/logo-2.png" // 🔥 Replace with your logo path
+              alt="Stellar Luxury Vacations"
               width={220}
               height={100}
               className="object-contain"
@@ -21,16 +21,16 @@ export default function LuxuryHeroSection() {
 
           {/* Heading */}
           <h1 className="text-2xl font-extrabold leading-tight">
-            Luxury Awaits with Royal Savoy Holidays.
+            Luxury Awaits with Stellar Luxury Vacations.
           </h1>
 
           {/* Description */}
           <p className="text-white/70 text-sm leading-relaxed max-w-xl">
-            Turn your vacation dreams into reality with Royal Savoy Holidays!
-            Elevate every moment with vacation ownership and unlock a world of
-            unforgettable adventures, exceptional stays, and cherished memories
-            waiting to be made. Book now and begin your journey to unparalleled
-            experiences!
+            Turn your vacation dreams into reality with Stellar Luxury
+            Vacations! Elevate every moment with vacation ownership and unlock a
+            world of unforgettable adventures, exceptional stays, and cherished
+            memories waiting to be made. Book now and begin your journey to
+            unparalleled experiences!
           </p>
 
           {/* Destinations */}

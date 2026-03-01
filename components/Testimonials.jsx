@@ -255,16 +255,6 @@ export default function Testimonials() {
           ))}
         </Swiper>
       </div>
-
-      {/* --- SCROLL TO TOP BUTTON (Fixed) --- */}
-      {showButton && (
-        <button
-          onClick={scrollToTop}
-          className="fixed bottom-8 right-8 z-50 bg-[#F5E6CA] w-12 h-12 rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(201,168,76,0.5)] hover:scale-110 transition-transform duration-300 animate-bounce-slow cursor-pointer"
-        >
-          <ArrowUp className="text-[#c9a84c] font-bold" size={24} />
-        </button>
-      )}
-    </section>
+      </section>
   );
 }

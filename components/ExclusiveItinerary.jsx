@@ -163,11 +163,8 @@ function VideoCard({ item, onPlay }) {
         {/* 3. Logo & Text Overlay (Always Visible Overlay) */}
         <div className="absolute inset-0 flex flex-col items-center justify-center z-10 pointer-events-none">
           {/* Fake Logo (Replace with <Image> for real logo) */}
-          <div className="flex flex-col items-center mb-2">
-            <span className="text-[#c9a84c] text-4xl mb-1">♛</span>
-            <span className="text-white text-[10px] tracking-[0.2em] font-serif uppercase">
-              Royal Savoy Holidays
-            </span>
+          <div className="flex flex-col items-center mb-0">
+           <img src="/images/logo.png" alt="Logo" className="object-contain h-20" />
           </div>
 
           {/* Big Destination Text */}

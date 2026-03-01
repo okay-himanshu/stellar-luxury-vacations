@@ -81,9 +81,9 @@ export default function Header() {
         >
           <Image
             src="/images/logo.png"
-            alt="Royal Savoy Holidays"
-            width={68}
-            height={68}
+            alt="Stellar Luxury Vacations"
+            width={100}
+            height={100}
             className="object-contain group-hover:scale-105 transition-transform duration-300"
             priority
           />

@@ -100,9 +100,9 @@ export default function PlanTrip() {
             Plan Your Trip <br /> With us
           </h2>
           <p className="text-gray-400 text-sm leading-relaxed mb-8">
-            At Royal Savoy Holidays, we understand that every journey is unique
-            and deserves careful planning. Our dedicated team is here to make
-            your travel dreams a reality. Whether you&apos;re looking for a
+            At Stellar Luxury Vacations, we understand that every journey is
+            unique and deserves careful planning. Our dedicated team is here to
+            make your travel dreams a reality. Whether you&apos;re looking for a
             serene beach getaway, an adventurous mountain trek, or a cultural
             city experience.
           </p>

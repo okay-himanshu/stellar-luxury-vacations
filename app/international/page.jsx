@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import axios from "axios";
 import { ChevronUp, ChevronLeft, ChevronRight } from "lucide-react";
+import CommonHero from "../../components/CommonHero";
 
 export default function InternationalResortsPage() {
   const [hotels, setHotels] = useState([]);
@@ -138,6 +139,8 @@ export default function InternationalResortsPage() {
       `,
         }}
       />
+
+      <CommonHero />
 
       <div className="min-h-screen bg-black text-white pt-28 px-6 md:px-12 pb-20 font-sans">
         <div className="max-w-[1400px] mx-auto">

@@ -12,14 +12,14 @@ const travelData = [
     desc: "We Offer Fast Booking, Fantastic Products, and Competitive Pricing & Amazing Experience.",
     subTitle: "Flights Offers",
     subDesc:
-      "Collect Miles With Royal Savoy Holidays And 20+ Partners Flying To 3000 Destinations.",
+      "Collect Miles With Stellar Luxury Vacations And 20+ Partners Flying To 3000 Destinations.",
   },
   {
     id: 2,
     image:
       "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=800&q=90", // Bus
     title: "Bus And Volvo",
-    desc: "Royal Savoy Holidays Offers Easy Bus Tickets For UPSRTC Volvo Buses Plying In Several City Routes. You Can Avail The Ongoing Deals And Cash Backs On Bus Reservation.",
+    desc: "Stellar Luxury Vacations Offers Easy Bus Tickets For UPSRTC Volvo Buses Plying In Several City Routes. You Can Avail The Ongoing Deals And Cash Backs On Bus Reservation.",
     subTitle: "Bus & Volvo Exciting Offers",
     subDesc:
       "On-Time Bookings:- 10 Lakh + Buses | 0 Convention Fees | 24×7 Support Team",
@@ -29,7 +29,7 @@ const travelData = [
     image:
       "https://images.unsplash.com/photo-1556122071-e404ea94b54e?w=800&q=90", // Taxi/Cab
     title: "Taxi",
-    desc: "Book Our Driver In The City With Royal Savoy Holidays, We Will Provide Our Clients A Professional Car Driver To Meet Any Travel Need, Be It A Private Party Or A Night On The Town Or A Trip To The Theatre Or Shopping, Sometimes Only The Best Will Do, And For Those Once-In-A Occasions Or Simply To Begin And End The Night Out With A Flourish, Our Clients Can Be Rest Assured That Drive Assist Will Get Them There In VIP Style, Picking Them Up On Time And Dropping Them Safely Home At The End Of The Trip.",
+    desc: "Book Our Driver In The City With Stellar Luxury Vacations, We Will Provide Our Clients A Professional Car Driver To Meet Any Travel Need, Be It A Private Party Or A Night On The Town Or A Trip To The Theatre Or Shopping, Sometimes Only The Best Will Do, And For Those Once-In-A Occasions Or Simply To Begin And End The Night Out With A Flourish, Our Clients Can Be Rest Assured That Drive Assist Will Get Them There In VIP Style, Picking Them Up On Time And Dropping Them Safely Home At The End Of The Trip.",
     subTitle: "", // No subtitle for Taxi based on screenshot
     subDesc: "",
   },

@@ -59,7 +59,7 @@ export default function Hero() {
           exit={{ opacity: 0 }}
           transition={{ duration: 1, ease: "easeInOut" }}
         >
-          <div className="absolute inset-0 bg-black/60" />
+          <div className="absolute inset-0 bg-black/30" />
         </motion.div>
       </AnimatePresence>
 
@@ -78,7 +78,7 @@ export default function Hero() {
           exit={{ opacity: 0 }}
           transition={{ duration: 1, ease: "easeInOut" }}
         >
-          <div className="absolute inset-0 bg-black/45" />
+          <div className="absolute inset-0 bg-black/20" />
         </motion.div>
       </AnimatePresence>
 
@@ -93,22 +93,13 @@ export default function Hero() {
       >
         <div className="flex flex-col items-center text-center">
           <Image
-            src="/images/logo.png"
-            alt="Royal Savoy Holidays"
+            src="/images/logo-no-bg.png"
+            alt="Stellar Luxury Vacations"
             width={160}
             height={160}
-            className="object-contain"
+            className="object-contain h-80 w-80"
             priority
           />
-          <span
-            className="text-[#c9a84c] text-[26px] font-bold tracking-[2px] leading-snug mt-3"
-            style={{ fontFamily: "Georgia, serif" }}
-          >
-            Royal Savoy Holidays
-          </span>
-          <span className="text-[#cccccc] text-[9px] tracking-[3px] uppercase mt-1.5">
-            Open your wings, discover the world
-          </span>
         </div>
       </div>
 

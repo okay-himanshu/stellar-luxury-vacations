@@ -56,12 +56,12 @@ export default function AboutUs() {
 
           <div className="relative">
             <h2 className="text-white text-3xl md:text-5xl font-bold mb-8 leading-tight">
-              Welcome to Royal Savoy Holidays,
+              Welcome to Stellar Luxury Vacations,
             </h2>
 
             <div className="space-y-6 text-gray-400 text-sm md:text-base leading-relaxed text-justify">
               <p>
-                At <strong className="text-white">Royal Savoy Holidays</strong>{" "}
+                At <strong className="text-white">Stellar Luxury Vacations</strong>{" "}
                 (A unit of SAVOY INN AND SUITES PRIVATE LIMITED) we redefine
                 hospitality by delivering world-class experiences both in India
                 and internationally. As a premier name in the travel and
@@ -79,7 +79,7 @@ export default function AboutUs() {
                 holiday experiences, blending comfort, sophistication, and
                 world-class service. Whether you&apos;re traveling for leisure,
                 celebrating life&apos;s milestones, or seeking a tranquil
-                escape, Royal Savoy Holidays is your perfect destination.
+                escape, Stellar Luxury Vacations is your perfect destination.
               </p>
             </div>
 
@@ -105,7 +105,7 @@ export default function AboutUs() {
             </h2>
 
             <p className="text-gray-400 text-sm md:text-base leading-relaxed mb-8">
-              At Royal Savoy Holidays, we believe that every journey should be
+              At Stellar Luxury Vacations, we believe that every journey should be
               exceptional. Our team of passionate travel experts is at your
               service 24/7, ready to assist with every detail of your trip to
               make it as smooth and enjoyable as possible.

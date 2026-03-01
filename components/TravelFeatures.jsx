@@ -48,31 +48,26 @@ const features = [
 
 export default function TravelFeatures() {
   return (
-    <section className="w-full bg-black py-20 px-4">
+    <section className="w-full bg-black py-10 px-4">
       <div className="max-w-7xl mx-auto flex flex-col items-center">
         {/* --- HEADER SECTION --- */}
         <div className="text-center mb-16 max-w-4xl">
           {/* Logo Placeholder - Replace src with your actual logo path */}
-          <div className="relative w-40 h-20 mx-auto mb-6">
+          <div className="relative w-40 h-20 mx-auto mb-10">
             {/* Agar logo transparent PNG hai toh yahan lagana */}
             {/* <Image src="/path-to-your-logo.png" alt="Royal Savoy Logo" fill className="object-contain" /> */}
 
             {/* Filhal ke liye main text/icon dikha raha hu taaki khali na lage */}
-            <div className="flex flex-col items-center justify-center h-full text-[#c9a84c]">
-              <span className="text-5xl">♛</span>
-              <span className="text-xs uppercase tracking-widest mt-1">
-                Royal Savoy Holidays
-              </span>
-            </div>
+            <img src="/images/logo-2.png" alt="Logo" className="object-contain" />
           </div>
 
           <h2 className="text-white text-3xl md:text-5xl font-bold mb-6">
-            Travel in style with Royal Savoy Holidays.
+            Travel in style with Stellar Luxury Vacations.
           </h2>
           <p className="text-gray-500 text-sm leading-relaxed">
-            At Royal Savoy Holidays, the Royalsavoyholidays redefines travel
+            At Stellar Luxury Vacations, the Stellarluxuryvacations redefines travel
             experiences, offering a unique gateway into the enchanting world of
-            the international Royalsavoyholidays. With an array of exceptional
+            the international Stellarluxuryvacations. With an array of exceptional
             value-added benefits, we&apos;re confident you&apos;ll fall in love
             with the difference we bring to every journey.
           </p>

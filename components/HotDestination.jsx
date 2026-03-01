@@ -108,7 +108,7 @@ export default function HotDestination() {
           Hot Destination
         </h2>
         <p className="text-gray-400 text-sm uppercase tracking-widest mb-4">
-          Explore Hot Locations with Royal Savoy Holidays
+          Explore Hot Locations with Stellar Luxury Vacations
         </p>
         <p className="text-gray-500 max-w-3xl mx-auto text-xs md:text-sm leading-relaxed">
           Discover the most sought-after destinations where luxury meets
