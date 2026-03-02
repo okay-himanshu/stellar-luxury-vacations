@@ -13,7 +13,7 @@ const itineraries = [
     videoUrl:
       "https://joy1.videvo.net/videvo_files/video/free/2019-12/large_watermarked/190915_A_04_Drone_13_preview.mp4", // Desert/Dubai vibe
     thumbnail:
-      "https://images.unsplash.com/photo-1512453979798-5ea932a23518?w=800&q=90",
+      "https://images.unsplash.com/photo-1518684079-3c830dcef090?q=80&w=987&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
   },
   {
     id: 2,
@@ -164,7 +164,11 @@ function VideoCard({ item, onPlay }) {
         <div className="absolute inset-0 flex flex-col items-center justify-center z-10 pointer-events-none">
           {/* Fake Logo (Replace with <Image> for real logo) */}
           <div className="flex flex-col items-center mb-0">
-           <img src="/images/logo.png" alt="Logo" className="object-contain h-20" />
+            <img
+              src="/images/logo.png"
+              alt="Logo"
+              className="object-contain h-20"
+            />
           </div>
 
           {/* Big Destination Text */}

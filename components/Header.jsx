@@ -109,7 +109,7 @@ export default function Header() {
 
           {/* Desktop Hotels Dropdown */}
           <li className="relative group py-6">
-            <span className="flex items-center gap-1 text-white text-sm font-medium tracking-wide group-hover:text-[#c9a84c] transition-colors duration-200 cursor-pointer border-b-2 border-transparent group-hover:border-[#c9a84c] pb-1">
+            <span className="flex items-center gap-1 text-white text-sm font-medium tracking-wide group-hover:text-[#c9a84c] transition-colors duration-200 cursor-pointer border-b-2 border-transparent group-hover:border-[#c9a84c]">
               Hotel &amp; Resorts
               <ChevronDown
                 size={12}
@@ -134,14 +134,6 @@ export default function Header() {
                 ))}
               </ul>
             </div>
-          </li>
-
-          <li>
-            <span
-              className={`flex items-center gap-1 ${linkStyle} cursor-pointer`}
-            >
-              Blogs <ChevronDown size={12} />
-            </span>
           </li>
 
           {/* Desktop Auth Section */}
@@ -294,16 +286,6 @@ export default function Header() {
                   </Link>
                 ))}
               </div>
-            </li>
-
-            <li>
-              <Link
-                href="/blogs"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="text-white text-lg font-medium hover:text-[#c9a84c] transition-colors"
-              >
-                Blogs
-              </Link>
             </li>
           </ul>
         </div>

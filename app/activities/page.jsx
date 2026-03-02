@@ -13,7 +13,7 @@ const row1Activities = [
     title: "Desert Safari",
     desc: "A desert safari is a thrilling adventure that offers a unique blend of excitement, cultural experiences, and breathtaking landscapes.",
     thumb:
-      "https://images.unsplash.com/photo-1547234935-80c7142ee969?w=800&q=90",
+      "https://images.unsplash.com/photo-1624062999726-083e5268525d?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
     videoUrl:
       "https://videos.pexels.com/video-files/2040081/2040081-hd_1920_1080_30fps.mp4",
   },
@@ -256,7 +256,7 @@ export default function ActivitiesPage() {
   return (
     <div className="w-full bg-black min-h-screen">
       {/* 1. HEADER IMAGE (Palace) */}
-      <CommonHero />
+      <CommonHero imageSrc="https://images.unsplash.com/photo-1618083707368-b3823daa2726?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" />
 
       {/* 2. MAIN CONTENT - Starts BELOW the image (No Overlap) */}
       <div className="max-w-[1400px] mx-auto px-6 py-20 relative z-10">

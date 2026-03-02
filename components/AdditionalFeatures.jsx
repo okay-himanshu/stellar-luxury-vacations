@@ -41,10 +41,10 @@ export default function AdditionalFeature() {
           <div className="relative w-full h-[600px] lg:h-[700px] rounded-lg overflow-hidden border border-gray-800 shadow-2xl group">
             {/* Background Image (Pool/Resort) */}
             <Image
-              src="https://images.unsplash.com/photo-1571896349842-6e53ce41e887?w=800&q=90"
+              src="https://images.unsplash.com/photo-1590381105924-c72589b9ef3f?q=80&w=2071&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
               alt="Additional Features Resort"
               fill
-              className="object-cover brightness-75 group-hover:scale-105 transition-transform duration-700"
+              className="object-cover brightness-50 group-hover:scale-105 transition-transform duration-700"
             />
 
             {/* Top Gradient Overlay for Logo Visibility */}

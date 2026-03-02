@@ -27,7 +27,7 @@ const travelData = [
   {
     id: 3,
     image:
-      "https://images.unsplash.com/photo-1556122071-e404ea94b54e?w=800&q=90", // Taxi/Cab
+      "https://images.unsplash.com/photo-1499353965760-b85389474bef?q=80&w=2232&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D", // Taxi/Cab
     title: "Taxi",
     desc: "Book Our Driver In The City With Stellar Luxury Vacations, We Will Provide Our Clients A Professional Car Driver To Meet Any Travel Need, Be It A Private Party Or A Night On The Town Or A Trip To The Theatre Or Shopping, Sometimes Only The Best Will Do, And For Those Once-In-A Occasions Or Simply To Begin And End The Night Out With A Flourish, Our Clients Can Be Rest Assured That Drive Assist Will Get Them There In VIP Style, Picking Them Up On Time And Dropping Them Safely Home At The End Of The Trip.",
     subTitle: "", // No subtitle for Taxi based on screenshot
