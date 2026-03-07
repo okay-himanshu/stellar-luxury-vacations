@@ -2,12 +2,13 @@ import { NextResponse } from "next/server";
 import { writeFile, mkdir } from "fs/promises";
 import path from "path";
 import dbConnect from "../../../lib/db";
-import { Hotel, Country, City } from "../../../models/hotel";
+import { Hotel } from "../../../models/hotel";
 import { successResponse, errorResponse } from "../../../lib/apiResponse";
 import { extractCoordinatesFromMapUrl } from "../../../utils/extractCoordinates";
 import { ENV } from "../../../lib/config";
 import jwt from "jsonwebtoken";
 import mongoose from "mongoose";
+import { City, Country } from "../../../models/location";
 
 const verifyAdmin = (req) => {
   const authHeader = req.headers.get("authorization");
