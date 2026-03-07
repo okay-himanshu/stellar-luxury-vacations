@@ -2,11 +2,12 @@ import { NextResponse } from "next/server";
 import { writeFile, mkdir } from "fs/promises";
 import path from "path";
 import dbConnect from "../../../lib/db";
-import { Hotel } from "../../../models/hotel";
+import { Hotel, Country, City } from "../../../models/hotel";
 import { successResponse, errorResponse } from "../../../lib/apiResponse";
 import { extractCoordinatesFromMapUrl } from "../../../utils/extractCoordinates";
 import { ENV } from "../../../lib/config";
 import jwt from "jsonwebtoken";
+import mongoose from "mongoose";
 
 const verifyAdmin = (req) => {
   const authHeader = req.headers.get("authorization");
@@ -44,7 +45,6 @@ async function handleImageUploads(images) {
 
   return imageUrls;
 }
-
 export async function GET(req) {
   try {
     await dbConnect();
@@ -57,14 +57,18 @@ export async function GET(req) {
 
     const query = {};
 
+    // region filter
     if (regionType) {
       query.regionType = regionType;
     }
 
+    // city filter
     if (cityIdsParam) {
       const cityIdsArray = cityIdsParam
         .split(",")
-        .filter((id) => id.trim() !== "");
+        .filter((id) => id.trim() !== "")
+        .map((id) => new mongoose.Types.ObjectId(id));
+
       if (cityIdsArray.length > 0) {
         query.cityId = { $in: cityIdsArray };
       }
