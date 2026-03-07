@@ -1,13 +1,33 @@
 import { NextResponse } from "next/server";
-import bcrypt from "bcryptjs"; // BCRYPT IMPORT KIYA
+import bcrypt from "bcryptjs";
 import dbConnect from "../../../lib/db";
 import { Member } from "../../../models/member";
 import { successResponse, errorResponse } from "../../../lib/apiResponse";
+import { ENV } from "../../../lib/config";
+import jwt from "jsonwebtoken";
 
-// 1. GET: Fetch all members (With Pagination & Search)
+const verifyAdmin = (req) => {
+  const authHeader = req.headers.get("authorization");
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    throw new Error("Unauthorized: No token provided");
+  }
+
+  const token = authHeader.split(" ")[1];
+  const decoded = jwt.verify(token, ENV.JWT_SECRET);
+
+  if (decoded.email !== ENV.ADMIN_EMAIL) {
+    throw new Error("Forbidden: Admin access required");
+  }
+
+  return decoded;
+};
+
 export async function GET(req) {
   try {
     await dbConnect();
+
+    verifyAdmin(req);
+
     const { searchParams } = new URL(req.url);
 
     const page = parseInt(searchParams.get("page")) || 1;
@@ -40,22 +60,27 @@ export async function GET(req) {
       totalItems: total,
     });
   } catch (error) {
-    return errorResponse(error.message);
+    const statusCode =
+      error.message.includes("Unauthorized") ||
+      error.message.includes("Forbidden")
+        ? 401
+        : 500;
+    return errorResponse(error.message, statusCode);
   }
 }
 
-// 2. POST: Add new member
 export async function POST(req) {
   try {
     await dbConnect();
+
+    verifyAdmin(req);
+
     const data = await req.json();
 
-    // Package ID user se nahi maang rahe, sirf zaroori details check kar rahe hain
     if (!data.password || !data.name || !data.phone) {
       return errorResponse("Password, Name, and Phone are required.", 400);
     }
 
-    // --- AUTO GENERATE UNIQUE PACKAGE ID (CIH + 7 digits) ---
     let newPackageId;
     let isUnique = false;
     while (!isUnique) {
@@ -63,52 +88,51 @@ export async function POST(req) {
       newPackageId = `CIH${randomNum}`;
       const existingId = await Member.findOne({ packageId: newPackageId });
       if (!existingId) {
-        isUnique = true; // Agar ID DB mein nahi hai, toh use karo
+        isUnique = true;
       }
     }
     data.packageId = newPackageId;
 
-    // --- BCRYPT PASSWORD HASHING ---
     const salt = await bcrypt.genSalt(10);
     data.password = await bcrypt.hash(data.password, salt);
 
-    // Auto calculate due amount
     const membershipAmount = Number(data.membershipAmount) || 0;
     const paidAmount = Number(data.paidAmount) || 0;
     data.dueAmount = membershipAmount - paidAmount;
 
-    // Save to DB
     const member = await Member.create(data);
     return successResponse(member, 201);
   } catch (error) {
-    return errorResponse(error.message);
+    const statusCode =
+      error.message.includes("Unauthorized") ||
+      error.message.includes("Forbidden")
+        ? 401
+        : 500;
+    return errorResponse(error.message, statusCode);
   }
 }
 
-// 3. PUT: Edit existing member
 export async function PUT(req) {
   try {
     await dbConnect();
+
+    verifyAdmin(req);
+
     const { searchParams } = new URL(req.url);
     const id = searchParams.get("id");
     if (!id) return errorResponse("Member ID is required", 400);
 
     const data = await req.json();
 
-    // --- BCRYPT LOGIC FOR EDIT ---
-    // Agar edit form mein naya password dala hai, toh usko hash karo
     if (data.password && data.password.trim() !== "") {
       const salt = await bcrypt.genSalt(10);
       data.password = await bcrypt.hash(data.password, salt);
     } else {
-      // Agar password field empty chodi hai, toh purana password overwrite na ho
       delete data.password;
     }
 
-    // User Package ID edit nahi kar sakta
     delete data.packageId;
 
-    // Auto calculate due amount
     const membershipAmount = Number(data.membershipAmount) || 0;
     const paidAmount = Number(data.paidAmount) || 0;
     data.dueAmount = membershipAmount - paidAmount;
@@ -116,22 +140,46 @@ export async function PUT(req) {
     const updatedMember = await Member.findByIdAndUpdate(id, data, {
       new: true,
     });
+
+    if (!updatedMember) {
+      return errorResponse("Member not found", 404);
+    }
+
     return successResponse(updatedMember);
   } catch (error) {
-    return errorResponse(error.message);
+    const statusCode =
+      error.message.includes("Unauthorized") ||
+      error.message.includes("Forbidden")
+        ? 401
+        : 500;
+    return errorResponse(error.message, statusCode);
   }
 }
 
-// 4. DELETE: Remove member
 export async function DELETE(req) {
   try {
     await dbConnect();
+
+    verifyAdmin(req);
+
     const { searchParams } = new URL(req.url);
     const id = searchParams.get("id");
 
-    await Member.findByIdAndDelete(id);
+    if (!id) return errorResponse("Member ID is required", 400);
+
+    const deletedMember = await Member.findByIdAndDelete(id);
+
+    if (!deletedMember) {
+      return errorResponse("Member not found", 404);
+    }
+
     return successResponse({ message: "Member deleted successfully" });
   } catch (error) {
-    return errorResponse(error.message);
+    const statusCode =
+      error.message.includes("Unauthorized") ||
+      error.message.includes("Forbidden")
+        ? 401
+        : 500;
+    return errorResponse(error.message, statusCode);
   }
 }

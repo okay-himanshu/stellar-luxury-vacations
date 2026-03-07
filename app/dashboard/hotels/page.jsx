@@ -22,10 +22,12 @@ export default function HotelsDashboard() {
   const [cities, setCities] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const token =
+    typeof window !== "undefined" ? localStorage.getItem("token") : "";
 
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const ITEMS_PER_PAGE = 5;
+  const ITEMS_PER_PAGE = 10;
 
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState("add");
@@ -34,7 +36,6 @@ export default function HotelsDashboard() {
   const [isGalleryOpen, setIsGalleryOpen] = useState(false);
   const [galleryImages, setGalleryImages] = useState([]);
 
-  // Updated Form State to include description
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -54,28 +55,24 @@ export default function HotelsDashboard() {
 
   const fileInputRef = useRef(null);
 
-  // --- DATA FETCHING ---
   const fetchData = async (page = 1) => {
     setLoading(true);
     try {
       const [resHotels, resCountries, resCities] = await Promise.all([
         axios.get(`/api/hotels?page=${page}&limit=${ITEMS_PER_PAGE}`),
-        axios.get("/api/countries?limit=0"),
-        axios.get("/api/cities?limit=0"),
+        axios.get("/api/countries?limit=1000"),
+        axios.get("/api/cities?limit=1000"),
       ]);
 
       if (resHotels.data.success) {
-        // Fix: Checking if the array is directly inside data or inside data.items
         const hotelData = Array.isArray(resHotels.data.data)
           ? resHotels.data.data
           : resHotels.data.data.items;
-
         setHotels(hotelData || []);
 
-        // Handling total pages dynamically if missing in new response structure
-        setTotalPages(
-          resHotels.data.totalPages || resHotels.data.data.totalPages || 1,
-        );
+        const totalItems =
+          resHotels.data.data.total || resHotels.data.total || 0;
+        setTotalPages(Math.ceil(totalItems / ITEMS_PER_PAGE) || 1);
       }
 
       if (resCountries.data.success) {
@@ -102,13 +99,11 @@ export default function HotelsDashboard() {
     fetchData(currentPage);
   }, [currentPage]);
 
-  const filteredCities = cities.filter(
-    (c) =>
-      c.countryId?._id === formData.countryId ||
-      c.countryId === formData.countryId,
-  );
+  const filteredCities = cities.filter((c) => {
+    const cId = c.countryId?._id || c.countryId;
+    return cId === formData.countryId;
+  });
 
-  // --- HANDLERS ---
   const openFormModal = (mode, hotel = null) => {
     setModalMode(mode);
     setError("");
@@ -116,11 +111,19 @@ export default function HotelsDashboard() {
 
     if (hotel) {
       setEditId(hotel._id);
+
+      const cId =
+        typeof hotel.countryId === "object"
+          ? hotel.countryId?._id
+          : hotel.countryId;
+      const ctyId =
+        typeof hotel.cityId === "object" ? hotel.cityId?._id : hotel.cityId;
+
       setFormData({
-        name: hotel.name,
+        name: hotel.name || "",
         description: hotel.description || "",
-        countryId: hotel.countryId?._id || "",
-        cityId: hotel.cityId?._id || "",
+        countryId: cId || "",
+        cityId: ctyId || "",
         regionType: hotel.regionType || "India",
         address: hotel.location?.address || "",
         lat: hotel.location?.lat || "",
@@ -150,7 +153,11 @@ export default function HotelsDashboard() {
   const handleDelete = async (id) => {
     if (!confirm("Are you sure you want to delete this hotel?")) return;
     try {
-      await axios.delete(`/api/hotels?id=${id}`);
+      await axios.delete(`/api/hotels?id=${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       fetchData(currentPage);
     } catch (err) {
       setError("Failed to delete hotel.");
@@ -172,7 +179,6 @@ export default function HotelsDashboard() {
     e.preventDefault();
     setError("");
 
-    // Frontend Validation
     if (!formData.name.trim()) return setError("Hotel name is required.");
     if (!formData.description.trim())
       return setError("Description is required.");
@@ -191,11 +197,17 @@ export default function HotelsDashboard() {
     try {
       if (modalMode === "edit") {
         await axios.put(`/api/hotels?id=${editId}`, data, {
-          headers: { "Content-Type": "multipart/form-data" },
+          headers: {
+            "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${token}`,
+          },
         });
       } else {
         await axios.post("/api/hotels", data, {
-          headers: { "Content-Type": "multipart/form-data" },
+          headers: {
+            "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${token}`,
+          },
         });
       }
       setIsFormModalOpen(false);
@@ -217,7 +229,6 @@ export default function HotelsDashboard() {
 
   return (
     <div className="max-w-6xl mx-auto space-y-6 p-6">
-      {/* HEADER */}
       <div className="flex justify-between items-center border-b border-gray-800 pb-4">
         <h1 className="text-3xl font-bold text-white">Hotels & Resorts</h1>
         <button
@@ -234,7 +245,6 @@ export default function HotelsDashboard() {
         </div>
       )}
 
-      {/* TABLE */}
       <div className="bg-[#1c1c1c] border border-gray-800 rounded-xl overflow-x-auto">
         <table className="w-full text-left">
           <thead>
@@ -348,9 +358,6 @@ export default function HotelsDashboard() {
         )}
       </div>
 
-      {/* ==========================================
-          GALLERY MODAL
-          ========================================== */}
       {isGalleryOpen && (
         <div className="fixed inset-0 bg-black/90 backdrop-blur-md z-[60] flex items-center justify-center p-4">
           <button
@@ -376,9 +383,6 @@ export default function HotelsDashboard() {
         </div>
       )}
 
-      {/* ==========================================
-          FORM MODAL (ADD / EDIT / VIEW)
-          ========================================== */}
       {isFormModalOpen && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-[#1c1c1c] border border-gray-800 rounded-xl w-full max-w-4xl p-6 relative max-h-[90vh] overflow-y-auto custom-scrollbar">
@@ -399,7 +403,6 @@ export default function HotelsDashboard() {
             )}
 
             <form onSubmit={handleSubmit} className="space-y-6">
-              {/* --- BASIC INFO --- */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="md:col-span-2">
                   <label className="block text-gray-400 text-sm mb-1">
@@ -433,13 +436,10 @@ export default function HotelsDashboard() {
                   >
                     <option value="India">India</option>
                     <option value="International">International</option>
-                    <option value="International Exchange">
-                      International Exchange
-                    </option>
+                    <option value="Internal Exchange">Internal Exchange</option>
                   </select>
                 </div>
 
-                {/* --- DESCRIPTION TEXTAREA --- */}
                 <div className="md:col-span-3">
                   <label className="block text-gray-400 text-sm mb-1">
                     Description <span className="text-red-500">*</span>
@@ -510,7 +510,6 @@ export default function HotelsDashboard() {
                 </div>
               </div>
 
-              {/* --- LOCATION TOGGLE --- */}
               <div className="bg-[#111] p-4 rounded-lg border border-gray-800">
                 <div className="flex gap-4 mb-4 border-b border-gray-800 pb-2">
                   <button
@@ -598,7 +597,6 @@ export default function HotelsDashboard() {
                 )}
               </div>
 
-              {/* --- IMAGES SECTION --- */}
               <div>
                 <label className="block text-gray-400 text-sm mb-2">
                   Hotel Images{" "}
@@ -679,7 +677,6 @@ export default function HotelsDashboard() {
                 )}
               </div>
 
-              {/* ACTION BUTTON */}
               {modalMode !== "view" && (
                 <button
                   disabled={isSubmitting}

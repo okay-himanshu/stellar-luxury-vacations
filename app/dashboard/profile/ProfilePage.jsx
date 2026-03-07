@@ -2,15 +2,13 @@
 
 import { useState, useEffect } from "react";
 import axios from "axios";
-import { User, Shield, Key, CreditCard } from "lucide-react";
+import { Printer } from "lucide-react";
 
 export default function ProfileClient() {
   const [currentRole, setCurrentRole] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [name, setName] = useState("Loading...");
 
   useEffect(() => {
-    // LocalStorage se role nikalna (Ensure "member" is handled)
     const role = localStorage.getItem("userRole") || "user";
     setCurrentRole(role);
     setIsLoading(false);
@@ -21,206 +19,77 @@ export default function ProfileClient() {
       <div className="max-w-4xl animate-pulse">
         <div className="h-8 bg-gray-800 rounded w-48 mb-2"></div>
         <div className="h-4 bg-gray-800 rounded w-72 mb-8"></div>
-        <div className="space-y-6">
-          {[1, 2, 3].map((i) => (
-            <div
-              key={i}
-              className="bg-[#1c1c1c] border border-gray-800 rounded-xl h-40"
-            ></div>
-          ))}
-        </div>
+        <div className="bg-[#141414] border border-gray-800 rounded-2xl h-96"></div>
       </div>
     );
   }
 
-  // Roles access logic
-  const isUserOrMember = ["admin", "editor", "user", "member"].includes(
-    currentRole,
-  );
-  const isAdminOrUser = ["admin", "user", "member"].includes(currentRole);
-  const isAdmin = currentRole === "admin";
   const isMember = currentRole === "member" || currentRole === "user";
 
   return (
     <div className="max-w-4xl">
-      <h1 className="text-3xl font-bold mb-2">Profile Settings</h1>
-      <p className="text-gray-400 mb-8">
-        Manage your account settings and preferences.
-      </p>
+      <style
+        dangerouslySetInnerHTML={{
+          __html: `
+          @media print {
+            body * {
+              visibility: hidden;
+            }
+            #printable-profile, #printable-profile * {
+              visibility: visible;
+              color: #000 !important;
+            }
+            #printable-profile {
+              position: absolute;
+              left: 0;
+              top: 0;
+              width: 100%;
+              background: #fff !important;
+              box-shadow: none !important;
+              border: none !important;
+            }
+            .print-row-even {
+              background-color: #f9fafb !important;
+              -webkit-print-color-adjust: exact !important;
+              print-color-adjust: exact !important;
+            }
+            .print-row-odd {
+              background-color: #ffffff !important;
+              -webkit-print-color-adjust: exact !important;
+              print-color-adjust: exact !important;
+            }
+            .print-header {
+              background-color: #f3f4f6 !important;
+              border-bottom: 1px solid #e5e7eb !important;
+              border-left: 4px solid #374151 !important;
+              -webkit-print-color-adjust: exact !important;
+              print-color-adjust: exact !important;
+            }
+            .print-hidden {
+              display: none !important;
+            }
+          }
+        `,
+        }}
+      />
 
-      <div className="space-y-6">
-        {/* ─── 1. PERSONAL INFO (DYNAMIC SECTION) ─── */}
-        {isUserOrMember && (
-          <div className="bg-[#1c1c1c] border border-gray-800 rounded-xl overflow-hidden">
-            <div className="p-6 border-b border-gray-800 flex items-start gap-4">
-              <div className="p-3 bg-gray-800 rounded-lg text-[#c9a84c]">
-                <User size={24} />
-              </div>
-              <div>
-                <h3 className="text-lg font-bold text-white">
-                  {isMember ? "Membership Details" : "Personal Information"}
-                </h3>
-                <p className="text-gray-400 text-sm">
-                  {isMember
-                    ? "Your complete Royal Savoy profile."
-                    : "Update your personal details."}
-                </p>
-              </div>
-            </div>
-
-            {/* DYNAMIC BODY: Member vs Admin */}
-            <div className="p-6 bg-[#111]">
-              {isMember ? (
-                <MemberProfileView />
-              ) : (
-                <div className="grid gap-4 md:grid-cols-2">
-                  <input
-                    type="text"
-                    placeholder="Full Name"
-                    className="bg-[#1c1c1c] border border-gray-700 text-white p-3 rounded-lg w-full focus:border-[#c9a84c] outline-none"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                  />
-                  <input
-                    type="email"
-                    placeholder="Email"
-                    className="bg-[#1c1c1c] border border-gray-700 text-gray-400 p-3 rounded-lg w-full cursor-not-allowed"
-                    defaultValue="admin@royal.com"
-                    disabled
-                  />
-                  <button
-                    type="button"
-                    onClick={() => console.log("Saving:", name)}
-                    className="bg-white text-black px-6 py-2 rounded-lg font-bold hover:bg-gray-200 transition md:col-span-2 w-fit"
-                  >
-                    Save Changes
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* ─── 2. SECURITY ─── */}
-        {isUserOrMember && (
-          <div className="bg-[#1c1c1c] border border-gray-800 rounded-xl overflow-hidden">
-            <div className="p-6 border-b border-gray-800 flex items-start gap-4">
-              <div className="p-3 bg-gray-800 rounded-lg text-[#c9a84c]">
-                <Key size={24} />
-              </div>
-              <div>
-                <h3 className="text-lg font-bold text-white">
-                  Login & Security
-                </h3>
-                <p className="text-gray-400 text-sm">
-                  Change password and 2FA settings.
-                </p>
-              </div>
-            </div>
-            <div className="p-6 bg-[#111]">
-              <div className="flex flex-col gap-4">
-                <button
-                  type="button"
-                  onClick={() => console.log("Change password")}
-                  className="flex items-center justify-between bg-[#1c1c1c] border border-gray-700 p-4 rounded-lg hover:border-white transition group"
-                >
-                  <span className="text-gray-300">Change Password</span>
-                  <span className="text-sm bg-gray-800 px-3 py-1 rounded text-white group-hover:bg-[#c9a84c] group-hover:text-black">
-                    Update
-                  </span>
-                </button>
-                <div className="flex items-center gap-3 text-sm text-gray-400">
-                  <div className="w-2 h-2 rounded-full bg-green-500"></div>
-                  2-Factor Authentication is Enabled
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* ─── 3. BILLING ─── */}
-        {isAdminOrUser &&
-          !isMember && ( // Member ki billing unki profile me dikh rahi hai
-            <div className="bg-[#1c1c1c] border border-gray-800 rounded-xl overflow-hidden">
-              <div className="p-6 border-b border-gray-800 flex items-start gap-4">
-                <div className="p-3 bg-gray-800 rounded-lg text-[#c9a84c]">
-                  <CreditCard size={24} />
-                </div>
-                <div>
-                  <h3 className="text-lg font-bold text-white">
-                    Billing & Plans
-                  </h3>
-                  <p className="text-gray-400 text-sm">
-                    Manage membership plans and invoices.
-                  </p>
-                </div>
-              </div>
-              <div className="p-6 bg-[#111]">
-                <div className="p-4 bg-gray-900/50 rounded-lg border border-dashed border-gray-700 text-center">
-                  <p className="text-gray-300 mb-2">
-                    Current Plan:{" "}
-                    <span className="text-[#c9a84c] font-bold">Gold Admin</span>
-                  </p>
-                  <button
-                    type="button"
-                    className="text-sm underline text-blue-400"
-                  >
-                    View Invoice History
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-
-        {/* ─── 4. ADMIN ZONE ─── */}
-        {isAdmin && (
-          <div className="bg-[#1c1c1c] border border-gray-800 rounded-xl overflow-hidden">
-            <div className="p-6 border-b border-gray-800 flex items-start gap-4">
-              <div className="p-3 bg-gray-800 rounded-lg text-[#c9a84c]">
-                <Shield size={24} />
-              </div>
-              <div>
-                <h3 className="text-lg font-bold text-white">Admin Controls</h3>
-                <p className="text-gray-400 text-sm">
-                  Global system settings and user roles.
-                </p>
-              </div>
-            </div>
-            <div className="p-6 bg-[#111]">
-              <div className="bg-red-900/10 border border-red-900/30 p-4 rounded-lg">
-                <h4 className="text-red-400 font-bold mb-2 flex items-center gap-2">
-                  <Shield size={16} /> Restricted Area
-                </h4>
-                <p className="text-gray-400 text-sm mb-4">
-                  You have super-admin privileges. You can manage global API
-                  keys and User Roles here.
-                </p>
-                <div className="flex gap-3">
-                  <button
-                    type="button"
-                    className="bg-red-600 text-white px-4 py-2 rounded text-xs font-bold hover:bg-red-700"
-                  >
-                    Manage Roles
-                  </button>
-                  <button
-                    type="button"
-                    className="bg-gray-700 text-white px-4 py-2 rounded text-xs font-bold hover:bg-gray-600"
-                  >
-                    View System Logs
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
+      <div className="mb-8 print-hidden">
+        <h1 className="text-3xl md:text-4xl font-bold mb-2 text-white tracking-tight">
+          Member Profile
+        </h1>
+        <p className="text-gray-400">View your complete membership details.</p>
       </div>
+
+      {isMember ? (
+        <MemberProfileView />
+      ) : (
+        <div className="p-8 bg-[#141414] border border-gray-800 rounded-2xl text-center text-gray-500">
+          This profile view is only available for registered members.
+        </div>
+      )}
     </div>
   );
 }
-
-// ==========================================
-// SUB-COMPONENT: MEMBER DETAILED PROFILE
-// ==========================================
 
 function MemberProfileView() {
   const [profile, setProfile] = useState(null);
@@ -247,6 +116,10 @@ function MemberProfileView() {
     fetchProfile();
   }, []);
 
+  const handlePrint = () => {
+    window.print();
+  };
+
   const formatDate = (dateString) => {
     if (!dateString) return "";
     const options = { year: "numeric", month: "short", day: "numeric" };
@@ -255,118 +128,156 @@ function MemberProfileView() {
 
   if (loading) {
     return (
-      <div className="text-center py-10 font-bold text-[#c9a84c] animate-pulse">
-        Loading your profile data...
+      <div className="flex flex-col items-center justify-center py-16 bg-[#141414] border border-gray-800 rounded-2xl print-hidden">
+        <div className="w-10 h-10 border-4 border-gray-700 border-t-white rounded-full animate-spin mb-4"></div>
+        <p className="font-medium text-gray-400 tracking-wide">
+          Loading your profile data...
+        </p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="text-center py-10 text-red-500 font-bold">{error}</div>
+      <div className="text-center py-10 text-red-400 font-medium bg-red-900/10 border border-red-900/30 rounded-2xl print-hidden">
+        {error}
+      </div>
     );
   }
 
   if (!profile) return null;
 
-  // Reusable Row Component
-  const DataRow = ({ label, value, isDark }) => (
+  const DataRow = ({ label, value, isEven }) => (
     <div
-      className={`flex py-2.5 px-4 text-sm md:text-base ${isDark ? "bg-[#ebe4d3]" : "bg-[#f4f0e6]"} text-[#222]`}
+      className={`flex py-3.5 px-5 text-sm md:text-[15px] transition-colors duration-200 ${
+        isEven ? "bg-[#1a1a1a] print-row-even" : "bg-[#111111] print-row-odd"
+      }`}
     >
-      <div className="w-[35%] md:w-[25%] font-semibold">{label}</div>
-      <div className="w-[5%] text-center">:</div>
-      <div className="w-[60%] md:w-[70%] font-medium">{value || "-"}</div>
+      <div className="w-[45%] md:w-[35%] font-medium text-gray-400">
+        {label}
+      </div>
+      <div className="w-[5%] text-gray-600 text-center">:</div>
+      <div className="w-[50%] md:w-[60%] font-semibold text-gray-100">
+        {value || "—"}
+      </div>
     </div>
   );
 
-  // Section Header Component
   const SectionHeader = ({ title }) => (
-    <div className="bg-[#a47b35] text-black font-bold px-4 py-2.5 uppercase text-sm tracking-wide">
-      {title}
+    <div className="print-header bg-[#141414] border-b border-gray-800 border-l-4 border-l-gray-300 px-5 py-4 mt-6 first:mt-0">
+      <h3 className="text-gray-200 font-bold uppercase text-xs md:text-sm tracking-[0.15em]">
+        {title}
+      </h3>
     </div>
   );
 
   return (
-    <div className="w-full shadow-lg border border-gray-300 rounded overflow-hidden">
-      {/* 1. PERSONAL DETAILS */}
+    <div
+      className="relative w-full bg-[#111111] border border-gray-800 rounded-2xl overflow-hidden"
+      id="printable-profile"
+    >
+      <div className="absolute top-4 right-4 z-10 print-hidden">
+        <button
+          onClick={handlePrint}
+          className="flex items-center gap-2 bg-[#1a1a1a] hover:bg-[#222222] text-gray-300 border border-gray-700 px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200"
+        >
+          <Printer size={16} />
+          Download / Print
+        </button>
+      </div>
+
       <div className="flex flex-col">
         <SectionHeader title="Personal Details" />
-        <DataRow label="Package ID" value={profile.packageId} isDark={false} />
-        <DataRow label="Name" value={profile.name} isDark={true} />
-        <DataRow label="Email" value={profile.email} isDark={false} />
+        <DataRow label="Package ID" value={profile.packageId} isEven={true} />
+        <DataRow label="Name" value={profile.name} isEven={false} />
+        <DataRow label="Email" value={profile.email} isEven={true} />
         <DataRow
           label="Date of birth"
           value={formatDate(profile.dob)}
-          isDark={true}
+          isEven={false}
         />
         <DataRow
           label="Anniversary Date"
           value={formatDate(profile.anniversaryDate)}
-          isDark={false}
+          isEven={true}
         />
-        <DataRow label="Spouse Name" value={profile.spouseName} isDark={true} />
+        <DataRow
+          label="Spouse Name"
+          value={profile.spouseName}
+          isEven={false}
+        />
         <DataRow
           label="Spouse Date of birth"
           value={formatDate(profile.spouseDob)}
-          isDark={false}
+          isEven={true}
         />
       </div>
 
-      {/* 2. CHILDREN DETAILS */}
-      <div className="flex flex-col border-t border-white">
+      <div className="flex flex-col">
         <SectionHeader title="Children Details" />
-        <div className="bg-[#f4f0e6] text-[#222] py-2.5 px-4 text-sm md:text-base font-medium">
-          {profile.childrenDetails || "No Children"}
+        <div className="bg-[#1a1a1a] print-row-even text-gray-300 py-4 px-5 text-sm md:text-[15px] font-medium leading-relaxed">
+          {profile.childrenDetails || "No Children Details Provided"}
         </div>
       </div>
 
-      {/* 3. CONTACT DETAILS */}
-      <div className="flex flex-col border-t border-white">
+      <div className="flex flex-col">
         <SectionHeader title="Contact Details" />
-        <DataRow label="Phone" value={profile.phone} isDark={false} />
+        <DataRow label="Phone" value={profile.phone} isEven={true} />
         <DataRow
           label="Alternate Phone"
           value={profile.alternatePhone}
-          isDark={true}
+          isEven={false}
         />
-        <DataRow label="Address" value={profile.address} isDark={false} />
-        <DataRow label="City" value={profile.city} isDark={true} />
-        <DataRow label="State" value={profile.state} isDark={false} />
+        <DataRow label="Address" value={profile.address} isEven={true} />
+        <DataRow label="City" value={profile.city} isEven={false} />
+        <DataRow label="State" value={profile.state} isEven={true} />
       </div>
 
-      {/* 4. MEMBERSHIP DETAILS */}
-      <div className="flex flex-col border-t border-white">
+      <div className="flex flex-col">
         <SectionHeader title="Membership Details" />
         <DataRow
           label="Membership Category"
           value={profile.membershipCategory}
-          isDark={false}
+          isEven={true}
         />
         <DataRow
           label="Membership Duration"
           value={profile.membershipDuration}
-          isDark={true}
+          isEven={false}
         />
+
         <DataRow
           label="Membership Amount"
-          value={`₹${profile.membershipAmount}`}
-          isDark={false}
+          value={
+            profile.membershipAmount
+              ? `₹ ${Number(profile.membershipAmount).toLocaleString("en-IN")}`
+              : "—"
+          }
+          isEven={true}
         />
         <DataRow
           label="Paid Amount"
-          value={`₹${profile.paidAmount}`}
-          isDark={true}
+          value={
+            profile.paidAmount
+              ? `₹ ${Number(profile.paidAmount).toLocaleString("en-IN")}`
+              : "—"
+          }
+          isEven={false}
         />
         <DataRow
           label="Due Amount"
-          value={`₹${profile.dueAmount}`}
-          isDark={false}
+          value={
+            profile.dueAmount
+              ? `₹ ${Number(profile.dueAmount).toLocaleString("en-IN")}`
+              : "—"
+          }
+          isEven={true}
         />
+
         <DataRow
           label="Joining Date"
           value={formatDate(profile.joiningDate)}
-          isDark={true}
+          isEven={false}
         />
       </div>
     </div>

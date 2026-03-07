@@ -5,10 +5,25 @@ import dbConnect from "../../../lib/db";
 import { Hotel } from "../../../models/hotel";
 import { successResponse, errorResponse } from "../../../lib/apiResponse";
 import { extractCoordinatesFromMapUrl } from "../../../utils/extractCoordinates";
+import { ENV } from "../../../lib/config";
+import jwt from "jsonwebtoken";
 
-/* =====================================================
-   IMAGE UPLOAD
-===================================================== */
+const verifyAdmin = (req) => {
+  const authHeader = req.headers.get("authorization");
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    throw new Error("Unauthorized: No token provided");
+  }
+
+  const token = authHeader.split(" ")[1];
+  const decoded = jwt.verify(token, ENV.JWT_SECRET);
+
+  if (decoded.email !== ENV.ADMIN_EMAIL) {
+    throw new Error("Forbidden: Admin access required");
+  }
+
+  return decoded;
+};
+
 async function handleImageUploads(images) {
   const uploadDir = path.join(process.cwd(), "public", "uploads", "hotels");
   await mkdir(uploadDir, { recursive: true });
@@ -30,30 +45,59 @@ async function handleImageUploads(images) {
   return imageUrls;
 }
 
-/* =====================================================
-   GET HOTELS
-===================================================== */
 export async function GET(req) {
   try {
     await dbConnect();
+    const { searchParams } = new URL(req.url);
 
-    const hotels = await Hotel.find()
+    const page = parseInt(searchParams.get("page")) || 1;
+    const limit = parseInt(searchParams.get("limit")) || 10;
+    const regionType = searchParams.get("regionType");
+    const cityIdsParam = searchParams.get("cityIds");
+
+    const query = {};
+
+    if (regionType) {
+      query.regionType = regionType;
+    }
+
+    if (cityIdsParam) {
+      const cityIdsArray = cityIdsParam
+        .split(",")
+        .filter((id) => id.trim() !== "");
+      if (cityIdsArray.length > 0) {
+        query.cityId = { $in: cityIdsArray };
+      }
+    }
+
+    const skip = (page - 1) * limit;
+
+    const hotels = await Hotel.find(query)
       .populate("countryId", "name")
       .populate("cityId", "name")
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
 
-    return successResponse(hotels);
+    const total = await Hotel.countDocuments(query);
+    const hasMore = page * limit < total;
+
+    return successResponse({
+      items: hotels,
+      total,
+      page,
+      hasMore,
+    });
   } catch (error) {
     return errorResponse(error.message);
   }
 }
 
-/* =====================================================
-   CREATE HOTEL
-===================================================== */
 export async function POST(req) {
   try {
     await dbConnect();
+
+    verifyAdmin(req);
 
     const formData = await req.formData();
 
@@ -72,7 +116,6 @@ export async function POST(req) {
       return errorResponse("Required fields missing", 400);
     }
 
-    /* ===== AUTO FETCH LAT LNG ===== */
     if ((!lat || !lng) && mapUrl) {
       const coords = await extractCoordinatesFromMapUrl(mapUrl);
 
@@ -101,16 +144,20 @@ export async function POST(req) {
 
     return successResponse(hotel, 201);
   } catch (error) {
-    return errorResponse(error.message);
+    const statusCode =
+      error.message.includes("Unauthorized") ||
+      error.message.includes("Forbidden")
+        ? 401
+        : 500;
+    return errorResponse(error.message, statusCode);
   }
 }
 
-/* =====================================================
-   UPDATE HOTEL
-===================================================== */
 export async function PUT(req) {
   try {
     await dbConnect();
+
+    verifyAdmin(req);
 
     const { searchParams } = new URL(req.url);
     const id = searchParams.get("id");
@@ -122,7 +169,6 @@ export async function PUT(req) {
     let lng = formData.get("lng") || null;
     const mapUrl = formData.get("mapUrl") || "";
 
-    /* ===== AUTO EXTRACT ON UPDATE ===== */
     if ((!lat || !lng) && mapUrl) {
       const coords = await extractCoordinatesFromMapUrl(mapUrl);
 
@@ -151,26 +197,45 @@ export async function PUT(req) {
       new: true,
     });
 
+    if (!updatedHotel) {
+      return errorResponse("Hotel not found", 404);
+    }
+
     return successResponse(updatedHotel);
   } catch (error) {
-    return errorResponse(error.message);
+    const statusCode =
+      error.message.includes("Unauthorized") ||
+      error.message.includes("Forbidden")
+        ? 401
+        : 500;
+    return errorResponse(error.message, statusCode);
   }
 }
 
-/* =====================================================
-   DELETE HOTEL
-===================================================== */
 export async function DELETE(req) {
   try {
     await dbConnect();
 
+    verifyAdmin(req);
+
     const { searchParams } = new URL(req.url);
     const id = searchParams.get("id");
 
-    await Hotel.findByIdAndDelete(id);
+    if (!id) return errorResponse("Hotel ID is required", 400);
+
+    const deletedHotel = await Hotel.findByIdAndDelete(id);
+
+    if (!deletedHotel) {
+      return errorResponse("Hotel not found", 404);
+    }
 
     return successResponse({ message: "Hotel deleted successfully" });
   } catch (error) {
-    return errorResponse(error.message);
+    const statusCode =
+      error.message.includes("Unauthorized") ||
+      error.message.includes("Forbidden")
+        ? 401
+        : 500;
+    return errorResponse(error.message, statusCode);
   }
 }

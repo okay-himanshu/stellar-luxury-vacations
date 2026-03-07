@@ -1,6 +1,24 @@
 import dbConnect from "../../../lib/db";
 import { City } from "../../../models/location";
 import { successResponse, errorResponse } from "../../../lib/apiResponse";
+import { ENV } from "../../../lib/config";
+import jwt from "jsonwebtoken";
+
+const verifyAdmin = (req) => {
+  const authHeader = req.headers.get("authorization");
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    throw new Error("Unauthorized: No token provided");
+  }
+
+  const token = authHeader.split(" ")[1];
+  const decoded = jwt.verify(token, ENV.JWT_SECRET);
+
+  if (decoded.email !== ENV.ADMIN_EMAIL) {
+    throw new Error("Forbidden: Admin access required");
+  }
+
+  return decoded;
+};
 
 export async function GET(req) {
   try {
@@ -8,7 +26,7 @@ export async function GET(req) {
     const { searchParams } = new URL(req.url);
 
     const page = parseInt(searchParams.get("page")) || 1;
-    const limit = parseInt(searchParams.get("limit")) || 5;
+    const limit = parseInt(searchParams.get("limit")) || 1000;
     const skip = (page - 1) * limit;
 
     const cities = await City.find()
@@ -33,6 +51,9 @@ export async function GET(req) {
 export async function POST(req) {
   try {
     await dbConnect();
+    
+    verifyAdmin(req);
+
     const { name, countryId, regionType } = await req.json();
 
     if (
@@ -50,13 +71,17 @@ export async function POST(req) {
     const city = await City.create({ name, countryId, regionType });
     return successResponse(city, 201);
   } catch (error) {
-    return errorResponse(error.message);
+    const statusCode = error.message.includes("Unauthorized") || error.message.includes("Forbidden") ? 401 : 500;
+    return errorResponse(error.message, statusCode);
   }
 }
 
 export async function PUT(req) {
   try {
     await dbConnect();
+    
+    verifyAdmin(req);
+
     const { searchParams } = new URL(req.url);
     const id = searchParams.get("id");
 
@@ -88,19 +113,31 @@ export async function PUT(req) {
 
     return successResponse(updatedCity);
   } catch (error) {
-    return errorResponse(error.message);
+    const statusCode = error.message.includes("Unauthorized") || error.message.includes("Forbidden") ? 401 : 500;
+    return errorResponse(error.message, statusCode);
   }
 }
 
 export async function DELETE(req) {
   try {
     await dbConnect();
+    
+    verifyAdmin(req);
+
     const { searchParams } = new URL(req.url);
     const id = searchParams.get("id");
+    
+    if (!id) return errorResponse("City ID is required", 400);
 
-    await City.findByIdAndDelete(id);
+    const deletedCity = await City.findByIdAndDelete(id);
+    
+    if (!deletedCity) {
+        return errorResponse("City not found", 404);
+    }
+    
     return successResponse({ message: "Deleted successfully" });
   } catch (error) {
-    return errorResponse(error.message);
+    const statusCode = error.message.includes("Unauthorized") || error.message.includes("Forbidden") ? 401 : 500;
+    return errorResponse(error.message, statusCode);
   }
 }

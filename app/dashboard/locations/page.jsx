@@ -17,6 +17,7 @@ export default function LocationsDashboard() {
   const [activeTab, setActiveTab] = useState("countries");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
+  const token = localStorage.getItem("token");
 
   const [countries, setCountries] = useState([]);
   const [countryPage, setCountryPage] = useState(1);
@@ -181,6 +182,9 @@ export default function LocationsDashboard() {
                           try {
                             await axios.delete(`/api/countries`, {
                               params: { id: c._id },
+                              headers: {
+                                Authorization: `Bearer ${token}`,
+                              },
                             });
                             fetchCountries(countryPage);
                             fetchAllCountries();
@@ -371,14 +375,25 @@ function AddCountryModal({ onClose, onSuccess }) {
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState("");
 
+  const token = localStorage.getItem("token");
+
   const submit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setErr("");
     try {
-      const res = await axios.post("/api/countries", { name, code });
+      const res = await axios.post(
+        "/api/countries",
+        { name, code },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
       if (res.data.success) onSuccess();
     } catch (error) {
+      console.log(error);
       setErr(error.response?.data?.error || "Error adding country");
     } finally {
       setLoading(false);
@@ -448,8 +463,9 @@ function CityModal({ countries, cityToEdit, onClose, onSuccess }) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState("");
+  const token = localStorage.getItem("token");
 
-  const regionOptions = ["India", "International", "International Exchange"];
+  const regionOptions = ["India", "International", "Internal Exchange"];
 
   const toggleRegion = (option) => {
     if (regionType.includes(option)) {
@@ -470,18 +486,35 @@ function CityModal({ countries, cityToEdit, onClose, onSuccess }) {
     setErr("");
     try {
       if (cityToEdit) {
-        const res = await axios.put(`/api/cities?id=${cityToEdit._id}`, {
-          name,
-          countryId,
-          regionType,
-        });
+        const res = await axios.put(
+          `/api/cities?id=${cityToEdit._id}`,
+          {
+            name,
+            countryId,
+            regionType,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          },
+        );
         if (res.data.success) onSuccess();
       } else {
-        const res = await axios.post("/api/cities", {
-          name,
-          countryId,
-          regionType,
-        });
+        const res = await axios.post(
+          "/api/cities",
+          {
+            name,
+            countryId,
+            regionType,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          },
+        );
+
         if (res.data.success) onSuccess();
       }
     } catch (error) {

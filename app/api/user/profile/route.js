@@ -7,7 +7,7 @@ import { successResponse, errorResponse } from "../../../../lib/apiResponse";
 export async function GET(req) {
   try {
     await dbConnect();
-    
+
     // Get token from headers
     const authHeader = req.headers.get("authorization");
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -15,9 +15,12 @@ export async function GET(req) {
     }
 
     const token = authHeader.split(" ")[1];
-    
+
     // Verify token
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || "fallback_secret");
+    const decoded = jwt.verify(
+      token,
+      process.env.JWT_SECRET || "fallback_secret",
+    );
 
     // Fetch member details (Excluding password)
     const member = await Member.findById(decoded.id).select("-password");

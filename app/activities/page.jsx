@@ -4,9 +4,6 @@ import { useRef, useState } from "react";
 import Image from "next/image";
 import CommonHero from "../../components/CommonHero";
 
-// ================= DATA =================
-
-// Row 1: 3 Cards
 const row1Activities = [
   {
     id: 1,
@@ -37,7 +34,6 @@ const row1Activities = [
   },
 ];
 
-// Row 2: Scuba Diving (Text Left, Image Right)
 const scubaData = {
   title: "Scuba Diving",
   desc: "Discover the underwater world with scuba diving! Plunge into crystal-clear waters and explore vibrant coral reefs, exotic marine life, and hidden shipwrecks. Whether you're an experienced diver or a curious beginner, scuba diving offers an unparalleled adventure. From the Great Barrier Reef in Australia to the cenotes of Mexico, the best diving spots around the globe await your exploration. Experience the serenity and thrill of being submerged in a different world. Gear up, follow safety protocols, and dive into an unforgettable underwater journey. Book your scuba diving adventure today and immerse yourself in the ocean's wonders!",
@@ -46,7 +42,6 @@ const scubaData = {
     "https://videos.pexels.com/video-files/856973/856973-hd_1920_1080_30fps.mp4",
 };
 
-// Row 3: 3 Cards
 const row3Activities = [
   {
     id: 4,
@@ -62,7 +57,7 @@ const row3Activities = [
     title: "Bungy Jumping",
     desc: "Take the leap of faith with bungy jumping! Feel the ultimate adrenaline rush as you dive from incredible heights and experience the thrill of freefall.",
     thumb:
-      "https://images.unsplash.com/photo-1625902306208-8f8306354898?w=800&q=90",
+      "https://images.unsplash.com/photo-1559677624-3c956f10d431?q=80&w=1625&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
     videoUrl:
       "https://videos.pexels.com/video-files/4492776/4492776-hd_1920_1080_25fps.mp4",
   },
@@ -77,7 +72,7 @@ const row3Activities = [
   },
 ];
 
-// Row 4: Skydiving (Image Left, Text Right)
+// Row 4:  (Image Left, Text Right)
 const skydivingData = {
   title: "Skydiving",
   desc: "Skydiving is one of the most exhilarating and adrenaline-pumping experiences one can undertake. It involves jumping from an aircraft at high altitudes and free-falling before deploying a parachute to glide safely to the ground. This extreme sport offers a unique blend of adventure, challenge, and breathtaking views, making it a bucket-list activity for thrill-seekers around the world. Here's a detailed look at what makes skydiving such an extraordinary experience.",
@@ -106,7 +101,7 @@ const galleryImages = [
   },
   {
     id: 4,
-    src: "https://images.unsplash.com/photo-1625844007086-a5170d4d7d13?w=800&q=90",
+    src: "https://images.unsplash.com/photo-1664735094820-c6c40d862d5b?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
     alt: "Waterfall Zipline",
   },
   {

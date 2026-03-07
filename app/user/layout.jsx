@@ -22,10 +22,10 @@ export default function ProtectedRoute({ children, allowedRoles = [] }) {
     }
   }, [user, role, loading]);
 
-  // Jab tak verify ho raha hai kuch render mat karo
+
   if (loading) return null;
 
-  // Unauthorized ya no user — kuch bhi render mat karo
+
   if (!user) return null;
   if (allowedRoles.length && !allowedRoles.includes(role)) return null;
 

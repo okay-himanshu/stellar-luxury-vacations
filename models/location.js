@@ -25,7 +25,7 @@ const CitySchema = new mongoose.Schema(
     regionType: [
       {
         type: String,
-        enum: ["India", "International", "International Exchange"],
+        enum: ["India", "International", "Internal Exchange"],
         required: true,
       }
     ],

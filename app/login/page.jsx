@@ -41,7 +41,7 @@ export default function LoginPage() {
       <div className="bg-[#1c1c1c] border border-gray-800 rounded-2xl w-full max-w-md p-8 shadow-2xl">
         <div className="text-center mb-8">
           <h1 className="text-[#c9a84c] text-3xl font-bold tracking-widest mb-2">
-            ROYAL SAVOY
+            Stellar Luxury Vacations
           </h1>
           <p className="text-gray-400 text-sm">Secure Portal Login</p>
         </div>

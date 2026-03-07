@@ -55,6 +55,7 @@ export default function MembersDashboard() {
   };
 
   const [formData, setFormData] = useState(initialForm);
+  const token = localStorage.getItem("token");
 
   // Auto calculate Due Amount
   useEffect(() => {
@@ -69,6 +70,11 @@ export default function MembersDashboard() {
     try {
       const res = await axios.get(
         `/api/members?page=${page}&limit=${ITEMS_PER_PAGE}&search=${search}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
       if (res.data.success) {
         setMembers(res.data.data.items);
@@ -151,7 +157,11 @@ export default function MembersDashboard() {
   const handleDelete = async (id) => {
     if (!confirm("Are you sure you want to delete this member?")) return;
     try {
-      await axios.delete(`/api/members?id=${id}`);
+      await axios.delete(`/api/members?id=${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       fetchData(currentPage, searchTerm);
     } catch (err) {
       setError("Failed to delete member.");
@@ -165,9 +175,17 @@ export default function MembersDashboard() {
 
     try {
       if (modalMode === "edit") {
-        await axios.put(`/api/members?id=${editId}`, formData);
+        await axios.put(`/api/members?id=${editId}`, formData, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
       } else {
-        await axios.post("/api/members", formData);
+        await axios.post("/api/members", formData, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
       }
       setIsFormModalOpen(false);
       fetchData(currentPage, searchTerm);
