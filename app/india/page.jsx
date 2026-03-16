@@ -188,7 +188,7 @@ export default function IndiaResortsPage() {
           </h1>
 
           <div className="flex flex-col md:flex-row gap-12 h-full items-start">
-            <aside className="w-full md:w-64 flex-shrink-0 md:sticky md:top-32 self-start">
+            {/* <aside className="w-full md:w-64 flex-shrink-0 md:sticky md:top-32 self-start">
               <h2 className="text-xl font-bold mb-5">City</h2>
               <div className="max-h-[65vh] overflow-y-auto pr-6 space-y-3.5 custom-scrollbar">
                 {cities.length === 0 ? (
@@ -229,7 +229,7 @@ export default function IndiaResortsPage() {
                   ))
                 )}
               </div>
-            </aside>
+            </aside> */}
 
             <main className="flex-1 w-full">
               {error && <p className="text-red-500">{error}</p>}

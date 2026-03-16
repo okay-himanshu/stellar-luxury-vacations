@@ -193,7 +193,7 @@ export default function Footer() {
             Copyright 2024 Stellar Luxury Vacations. All Rights Reserved.
           </p>
 
-          <div className="flex items-center gap-4">
+          {/* <div className="flex items-center gap-4">
             <span className="text-white text-sm">We Accept</span>
             <div className="flex gap-2">
               <PaymentIcon
@@ -214,7 +214,7 @@ export default function Footer() {
                 invert
               />
             </div>
-          </div>
+          </div> */}
         </div>
 
         <button

@@ -75,7 +75,7 @@ export default function Header() {
         </ul>
 
         {/* ================= LOGO ================= */}
-        <Link
+        {/* <Link
           href="/"
           className="lg:absolute lg:left-1/2 lg:-translate-x-1/2 flex flex-col items-center no-underline group z-50"
         >
@@ -87,7 +87,7 @@ export default function Header() {
             className="object-contain group-hover:scale-105 transition-transform duration-300"
             priority
           />
-        </Link>
+        </Link> */}
 
         {/* ================= MOBILE MENU BUTTON ================= */}
         <div className="lg:hidden flex items-center z-50">

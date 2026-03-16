@@ -83,7 +83,7 @@ export default function Hero() {
       </AnimatePresence>
 
       {/* ── Right Panel: Logo (same diagonal clip, always visible) ── */}
-      <div
+      {/* <div
         className="absolute top-0 right-0 h-full z-20 flex items-center justify-center"
         style={{
           width: "58%",
@@ -101,7 +101,7 @@ export default function Hero() {
             priority
           />
         </div>
-      </div>
+      </div> */}
 
       {/* ── Vertical Divider Lines ── */}
       <div className="absolute right-14 top-1/2 -translate-y-1/2 z-30 flex flex-col gap-2">

@@ -29,96 +29,118 @@ const features = [
 const videos = [
   {
     id: 1,
-
     src: "/videos/2.mp4",
   },
   {
     id: 2,
-
     src: "/videos/3.mp4",
   },
   {
     id: 3,
-
     src: "/videos/4.mp4",
   },
   {
     id: 4,
-
     src: "/videos/5.mp4",
   },
 ];
 
 export default function TravelAssociates({ shoudlShowVideos = true }) {
   return (
-    <section className="w-full bg-black px-4 md:px-12">
-      <div className="max-w-[1400px] mx-auto">
-        {/* --- HEADER --- */}
-        <div className="text-center mb-16">
-          <h2 className="text-white font-bold text-4xl md:text-5xl mb-6 mt-20">
-            Our Travel Associates
-          </h2>
-          <p className="text-gray-400 max-w-3xl mx-auto text-sm md:text-base leading-relaxed">
-            Travel has helped us to understand the meaning of life and it has
-            helped us become better people. Each time we travel, we see the
-            world with new eyes.
-          </p>
-        </div>
+    <>
+      <style
+        dangerouslySetInnerHTML={{
+          __html: `
+        @keyframes marquee {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+        .animate-marquee {
+          display: flex;
+          width: max-content;
+          animation: marquee 25s linear infinite;
+        }
+        .animate-marquee:hover {
+          animation-play-state: paused;
+        }
+      `,
+        }}
+      />
 
-        {/* --- LOGOS GRID --- */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-20">
-          {associates.map((item) => (
-            <div
-              key={item.id}
-              className="bg-white h-[80px] flex items-center justify-center p-4 rounded-sm hover:scale-105 transition-transform duration-300"
-            >
-              {/* Using standard img tag for logos to ensure fitting without Next.js config issues, 
-                  you can switch to next/image if configured */}
-              <img
-                src={item.src}
-                alt={item.name}
-                className="max-w-full max-h-full object-contain"
-              />
-            </div>
-          ))}
-        </div>
+      <section className="w-full bg-black px-4 md:px-12 overflow-hidden">
+        <div className="max-w-[1400px] mx-auto">
+          {/* --- HEADER --- */}
+          <div className="text-center mb-16">
+            <h2 className="text-white font-bold text-4xl md:text-5xl mb-6 mt-20">
+              Our Travel Partners
+            </h2>
+            <p className="text-gray-400 max-w-3xl mx-auto text-sm md:text-base leading-relaxed">
+              Travel has helped us to understand the meaning of life and it has
+              helped us become better people. Each time we travel, we see the
+              world with new eyes.
+            </p>
+          </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-10 mb-20">
-          {features.map((feature, index) => (
-            <div key={index} className="text-left">
-              <h3 className="text-[#c9a84c] text-2xl font-bold mb-4">
-                {feature.title}
-              </h3>
-              <p className="text-gray-500 text-sm leading-relaxed">
-                {feature.desc}
-              </p>
-            </div>
-          ))}
-        </div>
+          {/* --- INFINITE LOGOS SLIDER --- */}
+          <div className="relative w-full mb-20 overflow-hidden group">
+            {/* Adding fade gradient on edges for premium look (optional but looks great) */}
+            <div className="absolute top-0 left-0 w-16 h-full bg-gradient-to-r from-black to-transparent z-10 pointer-events-none"></div>
+            <div className="absolute top-0 right-0 w-16 h-full bg-gradient-to-l from-black to-transparent z-10 pointer-events-none"></div>
 
-        {/* --- CIRCULAR VIDEOS --- */}
-        {shoudlShowVideos && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {videos.map((video) => (
-              <div key={video.id} className="flex justify-center">
-                {/* Circle Container */}
-                <div className="relative w-[280px] h-[280px] rounded-full overflow-hidden border-4 border-transparent hover:border-[#c9a84c] transition-all duration-500 group">
-                  <video
-                    src={video.src}
-                    autoPlay
-                    loop
-                    muted
-                    playsInline
-                    className="w-full h-full object-cover transform transition-transform duration-700 group-hover:scale-110"
+            <div className="animate-marquee gap-6">
+              {/* Array ko 2 baar map kiya taaki loop seamless (bina jhatke ke) chal sake */}
+              {[...associates, ...associates].map((item, index) => (
+                <div
+                  key={`${item.id}-${index}`}
+                  className="w-[180px] md:w-[220px] flex-shrink-0 bg-white h-[80px] flex items-center justify-center p-4 rounded-sm transition-transform duration-300 hover:scale-[1.03] cursor-pointer"
+                >
+                  <img
+                    src={item.src}
+                    alt={item.name}
+                    className="max-w-full max-h-full object-contain"
                   />
-                  {/* Optional dark overlay if you want text on top later */}
-                  <div className="absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors"></div>
                 </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-10 mb-20">
+            {features.map((feature, index) => (
+              <div key={index} className="text-left">
+                <h3 className="text-[#c9a84c] text-2xl font-bold mb-4">
+                  {feature.title}
+                </h3>
+                <p className="text-gray-500 text-sm leading-relaxed">
+                  {feature.desc}
+                </p>
               </div>
             ))}
           </div>
-        )}
-      </div>
-    </section>
+
+          {/* --- CIRCULAR VIDEOS --- */}
+          {shoudlShowVideos && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+              {videos.map((video) => (
+                <div key={video.id} className="flex justify-center">
+                  {/* Circle Container */}
+                  <div className="relative w-[280px] h-[280px] rounded-full overflow-hidden border-4 border-transparent hover:border-[#c9a84c] transition-all duration-500 group">
+                    <video
+                      src={video.src}
+                      autoPlay
+                      loop
+                      muted
+                      playsInline
+                      className="w-full h-full object-cover transform transition-transform duration-700 group-hover:scale-110"
+                    />
+                    {/* Optional dark overlay if you want text on top later */}
+                    <div className="absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors"></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+    </>
   );
 }
