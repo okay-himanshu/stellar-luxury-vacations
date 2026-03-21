@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import { writeFile, mkdir } from "fs/promises";
+import path from "path";
 import dbConnect from "../../../lib/db";
 import { Hotel } from "../../../models/hotel";
 import { successResponse, errorResponse } from "../../../lib/apiResponse";
@@ -7,9 +9,6 @@ import { ENV } from "../../../lib/config";
 import jwt from "jsonwebtoken";
 import mongoose from "mongoose";
 import { City, Country } from "../../../models/location";
-
-// 👉 VERCEL BLOB IMPORT
-import { put } from "@vercel/blob";
 
 const verifyAdmin = (req) => {
   const authHeader = req.headers.get("authorization");
@@ -27,17 +26,24 @@ const verifyAdmin = (req) => {
   return decoded;
 };
 
-// 👉 VERCEL BLOB UPLOAD FUNCTION
+// 👉 Wapas Local File System (fs/promises) wala upload function
 async function handleImageUploads(images) {
+  const uploadDir = path.join(process.cwd(), "public", "uploads", "hotels");
+
+  // Create folder if it doesn't exist
+  await mkdir(uploadDir, { recursive: true });
+
   const imageUrls = [];
 
   for (const image of images) {
     if (typeof image === "object" && image.name) {
-      const uniqueName = `hotels/${Date.now()}-${image.name.replace(/\s+/g, "-")}`;
-      const blob = await put(uniqueName, image, {
-        access: "public",
-      });
-      imageUrls.push(blob.url);
+      const buffer = Buffer.from(await image.arrayBuffer());
+
+      const uniqueName = `${Date.now()}-${image.name.replace(/\s+/g, "-")}`;
+      const filePath = path.join(uploadDir, uniqueName);
+
+      await writeFile(filePath, buffer);
+      imageUrls.push(`/uploads/hotels/${uniqueName}`);
     }
   }
 
@@ -50,7 +56,7 @@ export async function GET(req) {
     const { searchParams } = new URL(req.url);
 
     const page = parseInt(searchParams.get("page")) || 1;
-    const limit = parseInt(searchParams.get("limit")) || 5; // Dashboard ke liye 5 rakha hai
+    const limit = parseInt(searchParams.get("limit")) || 5;
     const regionType = searchParams.get("regionType");
     const cityIdsParam = searchParams.get("cityIds");
 
@@ -76,7 +82,7 @@ export async function GET(req) {
     const hotels = await Hotel.find(query)
       .populate("countryId", "name")
       .populate("cityId", "name")
-      // 👉 YAHAN FIX HAI: _id: 1 add kiya taaki exact unique sorting ho aur page pe data repeat na ho
+      // 👉 PAGINATION FIX: _id: 1 rakha hai taaki data repeat na ho
       .sort({ createdAt: -1, _id: 1 })
       .skip(skip)
       .limit(limit);
