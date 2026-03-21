@@ -1,6 +1,4 @@
 import { NextResponse } from "next/server";
-import { writeFile, mkdir } from "fs/promises";
-import path from "path";
 import dbConnect from "../../../lib/db";
 import { Hotel } from "../../../models/hotel";
 import { successResponse, errorResponse } from "../../../lib/apiResponse";
@@ -9,6 +7,9 @@ import { ENV } from "../../../lib/config";
 import jwt from "jsonwebtoken";
 import mongoose from "mongoose";
 import { City, Country } from "../../../models/location";
+
+// 👉 VERCEL BLOB IMPORT
+import { put } from "@vercel/blob";
 
 const verifyAdmin = (req) => {
   const authHeader = req.headers.get("authorization");
@@ -26,44 +27,39 @@ const verifyAdmin = (req) => {
   return decoded;
 };
 
+// 👉 VERCEL BLOB UPLOAD FUNCTION
 async function handleImageUploads(images) {
-  const uploadDir = path.join(process.cwd(), "public", "uploads", "hotels");
-  await mkdir(uploadDir, { recursive: true });
-
   const imageUrls = [];
 
   for (const image of images) {
     if (typeof image === "object" && image.name) {
-      const buffer = Buffer.from(await image.arrayBuffer());
-
-      const uniqueName = `${Date.now()}-${image.name.replace(/\s+/g, "-")}`;
-      const filePath = path.join(uploadDir, uniqueName);
-
-      await writeFile(filePath, buffer);
-      imageUrls.push(`/uploads/hotels/${uniqueName}`);
+      const uniqueName = `hotels/${Date.now()}-${image.name.replace(/\s+/g, "-")}`;
+      const blob = await put(uniqueName, image, {
+        access: "public",
+      });
+      imageUrls.push(blob.url);
     }
   }
 
   return imageUrls;
 }
+
 export async function GET(req) {
   try {
     await dbConnect();
     const { searchParams } = new URL(req.url);
 
     const page = parseInt(searchParams.get("page")) || 1;
-    const limit = parseInt(searchParams.get("limit")) || 10;
+    const limit = parseInt(searchParams.get("limit")) || 5; // Dashboard ke liye 5 rakha hai
     const regionType = searchParams.get("regionType");
     const cityIdsParam = searchParams.get("cityIds");
 
     const query = {};
 
-    // region filter
     if (regionType) {
       query.regionType = regionType;
     }
 
-    // city filter
     if (cityIdsParam) {
       const cityIdsArray = cityIdsParam
         .split(",")
@@ -80,7 +76,8 @@ export async function GET(req) {
     const hotels = await Hotel.find(query)
       .populate("countryId", "name")
       .populate("cityId", "name")
-      .sort({ createdAt: -1 })
+      // 👉 YAHAN FIX HAI: _id: 1 add kiya taaki exact unique sorting ho aur page pe data repeat na ho
+      .sort({ createdAt: -1, _id: 1 })
       .skip(skip)
       .limit(limit);
 
@@ -101,7 +98,6 @@ export async function GET(req) {
 export async function POST(req) {
   try {
     await dbConnect();
-
     verifyAdmin(req);
 
     const formData = await req.formData();
@@ -123,7 +119,6 @@ export async function POST(req) {
 
     if ((!lat || !lng) && mapUrl) {
       const coords = await extractCoordinatesFromMapUrl(mapUrl);
-
       if (coords) {
         lat = coords.lat;
         lng = coords.lng;
@@ -131,7 +126,6 @@ export async function POST(req) {
     }
 
     const images = formData.getAll("images");
-
     if (images.length === 0)
       return errorResponse("Upload at least 1 image.", 400);
 
@@ -161,7 +155,6 @@ export async function POST(req) {
 export async function PUT(req) {
   try {
     await dbConnect();
-
     verifyAdmin(req);
 
     const { searchParams } = new URL(req.url);
@@ -176,7 +169,6 @@ export async function PUT(req) {
 
     if ((!lat || !lng) && mapUrl) {
       const coords = await extractCoordinatesFromMapUrl(mapUrl);
-
       if (coords) {
         lat = coords.lat;
         lng = coords.lng;
@@ -220,7 +212,6 @@ export async function PUT(req) {
 export async function DELETE(req) {
   try {
     await dbConnect();
-
     verifyAdmin(req);
 
     const { searchParams } = new URL(req.url);
