@@ -85,9 +85,9 @@ export default function Footer() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
           <div className="flex flex-col items-start">
-            <div className="mb-6 relative w-[150px] h-[50px]">
+            <div className="mb-6 relative w-[150px] h-[100px]">
               <Image
-                src="/images/logo-2.png"
+                src="/images/logo.png"
                 alt="logo"
                 fill
                 className="object-contain object-left"
@@ -201,7 +201,8 @@ export default function Footer() {
 
         <div className="flex flex-col md:flex-row justify-between items-center pt-8 border-t border-gray-900 gap-6">
           <p className="text-gray-500 text-xs text-center md:text-left">
-            Copyright 2024 Stellar Luxury Vacations. All Rights Reserved.
+            Copyright { new Date().getFullYear() } Stellar Luxury Vacations.
+            All Rights Reserved.
           </p>
 
           {/* <div className="flex items-center gap-4">

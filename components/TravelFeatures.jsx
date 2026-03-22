@@ -58,7 +58,7 @@ export default function TravelFeatures() {
             {/* <Image src="/path-to-your-logo.png" alt="Royal Savoy Logo" fill className="object-contain" /> */}
 
             {/* Filhal ke liye main text/icon dikha raha hu taaki khali na lage */}
-            <img src="/images/logo-2.png" alt="Logo" className="object-contain" />
+            <img src="/images/logo.png" alt="Logo" className="object-contain" />
           </div>
 
           <h2 className="text-white text-3xl md:text-5xl font-bold mb-6">

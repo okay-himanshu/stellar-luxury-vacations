@@ -11,7 +11,7 @@ export default function LuxuryHeroSection() {
           {/* Logo */}
           <div>
             <Image
-              src="/images/logo-2.png" // 🔥 Replace with your logo path
+              src="/images/logo.png" // 🔥 Replace with your logo path
               alt="Stellar Luxury Vacations"
               width={220}
               height={100}
