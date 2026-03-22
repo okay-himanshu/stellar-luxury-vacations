@@ -50,13 +50,13 @@ export default function Footer() {
 
   const quickLinks = [
     "Privacy",
-    "Terms & Conditions",
+    "Terms",
     "Refund",
     "Disclaimer",
-    "News Release",
-    "Client Login",
-    "Staff Login",
-    "Paynow",
+    // "News Release",
+    // "Client Login",
+    // "Staff Login",
+    // "Paynow",
   ];
 
   return (
@@ -122,7 +122,7 @@ export default function Footer() {
               {quickLinks.map((link, i) => (
                 <li key={i}>
                   <a
-                    href="#"
+                    href={`/${link.toLowerCase().replace(/ & /g, "-").replace(/ /g, "-")}`}
                     className="flex items-center gap-2 text-gray-400 hover:text-[#c9a84c] transition-colors text-sm"
                   >
                     <ChevronRight size={16} className="text-gray-600" />
@@ -138,22 +138,33 @@ export default function Footer() {
             <div className="space-y-6">
               <div className="flex items-start gap-4">
                 <Phone className="text-orange-600 mt-1" size={20} />
-                <span className="text-gray-400 text-sm">01204566747</span>
+                <a href="tel:+911169313958" className="text-gray-400 text-sm">
+                  +91 1169313958
+                </a>{" "}
               </div>
 
               <div className="flex items-start gap-4">
                 <Mail className="text-green-600 mt-1" size={20} />
                 <div className="flex flex-col text-gray-400 text-sm">
-                  <span>info@stellarluxuryvacations.com</span>
-                  <span>support@stellarluxuryvacations.com</span>
+                  <span>
+                    <a href="mailto:info@stellarluxuryvacations.com">
+                      info@stellarluxuryvacations.com
+                    </a>
+                  </span>
+
+                  <span>
+                    <a href="mailto:reservations@stellarluxuryvacations.com">
+                      reservations@stellarluxuryvacations.com
+                    </a>
+                  </span>
                 </div>
               </div>
 
               <div className="flex items-start gap-4">
-                <MapPin className="text-teal-500 mt-1" size={20} />
+                <MapPin className="text-teal-500 mt-1" size={30} />
                 <p className="text-gray-400 text-sm">
-                  C-277 Second Floor <br />
-                  Sector 63, UP 201301
+                  OFFICE NO. 618C ON SIXTH PLOOR, PLOT NO. 6,JAINA TOWER-2,
+                  JANAK PURI, NEW DELHI-110058
                 </p>
               </div>
             </div>
