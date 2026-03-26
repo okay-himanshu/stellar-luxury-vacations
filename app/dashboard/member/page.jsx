@@ -31,6 +31,7 @@ export default function MembersDashboard() {
   const [editId, setEditId] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Initial State updated to include new arrays
   const initialForm = {
     packageId: "",
     password: "",
@@ -52,10 +53,17 @@ export default function MembersDashboard() {
     paidAmount: "",
     dueAmount: "",
     joiningDate: "",
+    totalNights: 0,
+    usedNights: 0,
+    holidays: [],
+    membershipPayments: [],
+    amcPayments: [],
+    offers: [],
   };
 
   const [formData, setFormData] = useState(initialForm);
-  const token = localStorage.getItem("token");
+  const token =
+    typeof window !== "undefined" ? localStorage.getItem("token") : "";
 
   // Auto calculate Due Amount
   useEffect(() => {
@@ -71,10 +79,8 @@ export default function MembersDashboard() {
       const res = await axios.get(
         `/api/members?page=${page}&limit=${ITEMS_PER_PAGE}&search=${search}`,
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+          headers: { Authorization: `Bearer ${token}` },
+        },
       );
       if (res.data.success) {
         setMembers(res.data.data.items);
@@ -87,13 +93,11 @@ export default function MembersDashboard() {
     }
   };
 
-  // Initial load and Page Change
   useEffect(() => {
     fetchData(currentPage, searchTerm);
   }, [currentPage]);
 
-  // --- LODASH DEBOUNCE SEARCH ---
-  // Using useCallback to ensure the debounced function is not recreated on every render
+  // Debounced Search
   const debouncedFetch = useCallback(
     debounce((query) => {
       setCurrentPage(1);
@@ -108,11 +112,13 @@ export default function MembersDashboard() {
     debouncedFetch(val);
   };
 
-  // Format date for display in table
   const displayDate = (dateString) => {
     if (!dateString) return "N/A";
-    const options = { year: "numeric", month: "short", day: "numeric" };
-    return new Date(dateString).toLocaleDateString("en-IN", options);
+    return new Date(dateString).toLocaleDateString("en-IN", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
   };
 
   // Handle Form Modal Open
@@ -126,7 +132,7 @@ export default function MembersDashboard() {
 
       setFormData({
         packageId: member.packageId || "",
-        password: "", // Always clear password on edit open for security
+        password: "", // Clear password on edit
         name: member.name || "",
         email: member.email || "",
         dob: formatDate(member.dob),
@@ -145,11 +151,36 @@ export default function MembersDashboard() {
         paidAmount: member.paidAmount || "",
         dueAmount: member.dueAmount || "",
         joiningDate: formatDate(member.joiningDate),
+
+        // New Array Data Population
+        totalNights: member.totalNights || 0,
+        usedNights: member.usedNights || 0,
+        holidays:
+          member.holidays?.map((h) => ({
+            ...h,
+            checkIn: formatDate(h.checkIn),
+            checkOut: formatDate(h.checkOut),
+            bookedDate: formatDate(h.bookedDate),
+          })) || [],
+        membershipPayments:
+          member.membershipPayments?.map((p) => ({
+            ...p,
+            receiptDate: formatDate(p.receiptDate),
+          })) || [],
+        amcPayments:
+          member.amcPayments?.map((p) => ({
+            ...p,
+            receiptDate: formatDate(p.receiptDate),
+          })) || [],
+        offers:
+          member.offers?.map((o) => ({
+            ...o,
+            validity: formatDate(o.validity),
+          })) || [],
       });
     } else {
       setEditId(null);
-      // Auto Assign Package ID text for new member (Actual ID generated on backend)
-      setFormData({ ...initialForm, packageId: "Auto-Generated on Save" });
+      setFormData(initialForm);
     }
     setIsFormModalOpen(true);
   };
@@ -158,9 +189,7 @@ export default function MembersDashboard() {
     if (!confirm("Are you sure you want to delete this member?")) return;
     try {
       await axios.delete(`/api/members?id=${id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
       fetchData(currentPage, searchTerm);
     } catch (err) {
@@ -176,15 +205,11 @@ export default function MembersDashboard() {
     try {
       if (modalMode === "edit") {
         await axios.put(`/api/members?id=${editId}`, formData, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         });
       } else {
         await axios.post("/api/members", formData, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         });
       }
       setIsFormModalOpen(false);
@@ -196,8 +221,27 @@ export default function MembersDashboard() {
     }
   };
 
+  // --- ARRAY HANDLERS (HOLIDAYS, PAYMENTS, OFFERS) ---
+  const handleArrayChange = (arrayName, index, field, value) => {
+    const newArray = [...formData[arrayName]];
+    newArray[index][field] = value;
+    setFormData({ ...formData, [arrayName]: newArray });
+  };
+
+  const addArrayItem = (arrayName, template) => {
+    setFormData({
+      ...formData,
+      [arrayName]: [...formData[arrayName], template],
+    });
+  };
+
+  const removeArrayItem = (arrayName, index) => {
+    const newArray = formData[arrayName].filter((_, i) => i !== index);
+    setFormData({ ...formData, [arrayName]: newArray });
+  };
+
   return (
-    <div className="max-w-7xl mx-auto space-y-6 p-6">
+    <div className="max-w-7xl mx-auto space-y-6 p-6 font-sans">
       {/* HEADER & CONTROLS */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-gray-800 pb-4">
         <h1 className="text-3xl font-bold text-white flex items-center gap-3">
@@ -205,7 +249,6 @@ export default function MembersDashboard() {
         </h1>
 
         <div className="flex items-center gap-4 w-full md:w-auto">
-          {/* Debounced Search Bar */}
           <div className="relative w-full md:w-64">
             <Search
               className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500"
@@ -319,7 +362,6 @@ export default function MembersDashboard() {
             </tbody>
           </table>
 
-          {/* Pagination */}
           {totalPages > 1 && (
             <div className="p-4 bg-[#111] border-t border-gray-800 flex items-center justify-between">
               <span className="text-sm text-gray-400">
@@ -348,11 +390,11 @@ export default function MembersDashboard() {
       )}
 
       {/* ==========================================
-          FORM MODAL
+          FORM MODAL (WITH NEW SECTIONS)
           ========================================== */}
       {isFormModalOpen && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-[#1c1c1c] border border-gray-800 rounded-xl w-full max-w-5xl p-6 relative max-h-[90vh] overflow-y-auto custom-scrollbar">
+          <div className="bg-[#1c1c1c] border border-gray-800 rounded-xl w-full max-w-6xl p-6 relative max-h-[90vh] overflow-y-auto custom-scrollbar">
             <button
               onClick={() => setIsFormModalOpen(false)}
               className="absolute top-4 right-4 text-gray-400 hover:text-white"
@@ -369,22 +411,27 @@ export default function MembersDashboard() {
               </div>
             )}
 
-            <form onSubmit={handleSubmit} className="space-y-8">
+            <form onSubmit={handleSubmit} className="space-y-10">
               {/* --- SECTION 1: PERSONAL DETAILS --- */}
               <div>
-                <h3 className="text-lg font-bold text-[#c9a84c] mb-4 bg-[#111] p-2 rounded">
+                <h3 className="text-lg font-bold text-[#c9a84c] mb-4 border-l-4 border-[#c9a84c] pl-3">
                   Personal Details & Login
                 </h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                   <div>
                     <label className="block text-gray-400 text-xs mb-1">
                       Package ID *
                     </label>
                     <input
-                      disabled
+                      disabled={modalMode === "view" || modalMode === "edit"}
+                      required
                       type="text"
                       value={formData.packageId}
-                      className="w-full bg-[#111] border border-gray-700 p-2.5 rounded text-white outline-none cursor-not-allowed uppercase font-bold text-[#c9a84c]"
+                      onChange={(e) =>
+                        setFormData({ ...formData, packageId: e.target.value })
+                      }
+                      className="w-full bg-[#111] border border-gray-700 p-2.5 rounded text-white outline-none focus:border-[#c9a84c] uppercase disabled:opacity-50"
+                      placeholder="e.g. CIH1234567"
                     />
                   </div>
                   <div>
@@ -403,7 +450,7 @@ export default function MembersDashboard() {
                       placeholder={
                         modalMode === "edit"
                           ? "Leave blank to keep current"
-                          : "Set user password"
+                          : "Set password"
                       }
                     />
                   </div>
@@ -437,8 +484,6 @@ export default function MembersDashboard() {
                       className="w-full bg-[#111] border border-gray-700 p-2.5 rounded text-white outline-none focus:border-[#c9a84c] disabled:opacity-50"
                     />
                   </div>
-
-                  {/* NOTE: [color-scheme:dark] class added to fix black icon on dark mode */}
                   <div>
                     <label className="block text-gray-400 text-xs mb-1">
                       Date of Birth
@@ -498,117 +543,15 @@ export default function MembersDashboard() {
                       className="w-full bg-[#111] border border-gray-700 p-2.5 rounded text-white outline-none focus:border-[#c9a84c] disabled:opacity-50 [color-scheme:dark]"
                     />
                   </div>
-                  <div className="md:col-span-1">
-                    <label className="block text-gray-400 text-xs mb-1">
-                      Children Details
-                    </label>
-                    <input
-                      disabled={modalMode === "view"}
-                      type="text"
-                      value={formData.childrenDetails}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          childrenDetails: e.target.value,
-                        })
-                      }
-                      className="w-full bg-[#111] border border-gray-700 p-2.5 rounded text-white outline-none focus:border-[#c9a84c] disabled:opacity-50"
-                      placeholder="e.g. No Children"
-                    />
-                  </div>
                 </div>
               </div>
 
-              {/* --- SECTION 2: CONTACT DETAILS --- */}
+              {/* --- SECTION 2: MEMBERSHIP & BILLING --- */}
               <div>
-                <h3 className="text-lg font-bold text-[#c9a84c] mb-4 bg-[#111] p-2 rounded">
-                  Contact Details
+                <h3 className="text-lg font-bold text-[#c9a84c] mb-4 border-l-4 border-[#c9a84c] pl-3">
+                  Membership & Core Billing
                 </h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div>
-                    <label className="block text-gray-400 text-xs mb-1">
-                      Phone *
-                    </label>
-                    <input
-                      disabled={modalMode === "view"}
-                      required
-                      type="text"
-                      value={formData.phone}
-                      onChange={(e) =>
-                        setFormData({ ...formData, phone: e.target.value })
-                      }
-                      className="w-full bg-[#111] border border-gray-700 p-2.5 rounded text-white outline-none focus:border-[#c9a84c] disabled:opacity-50"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-gray-400 text-xs mb-1">
-                      Alternate Phone
-                    </label>
-                    <input
-                      disabled={modalMode === "view"}
-                      type="text"
-                      value={formData.alternatePhone}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          alternatePhone: e.target.value,
-                        })
-                      }
-                      className="w-full bg-[#111] border border-gray-700 p-2.5 rounded text-white outline-none focus:border-[#c9a84c] disabled:opacity-50"
-                    />
-                  </div>
-                  <div className="md:col-span-3">
-                    <label className="block text-gray-400 text-xs mb-1">
-                      Full Address
-                    </label>
-                    <input
-                      disabled={modalMode === "view"}
-                      type="text"
-                      value={formData.address}
-                      onChange={(e) =>
-                        setFormData({ ...formData, address: e.target.value })
-                      }
-                      className="w-full bg-[#111] border border-gray-700 p-2.5 rounded text-white outline-none focus:border-[#c9a84c] disabled:opacity-50"
-                      placeholder="e.g. A-2 Gayatri Vihar..."
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-gray-400 text-xs mb-1">
-                      City
-                    </label>
-                    <input
-                      disabled={modalMode === "view"}
-                      type="text"
-                      value={formData.city}
-                      onChange={(e) =>
-                        setFormData({ ...formData, city: e.target.value })
-                      }
-                      className="w-full bg-[#111] border border-gray-700 p-2.5 rounded text-white outline-none focus:border-[#c9a84c] disabled:opacity-50"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-gray-400 text-xs mb-1">
-                      State
-                    </label>
-                    <input
-                      disabled={modalMode === "view"}
-                      type="text"
-                      value={formData.state}
-                      onChange={(e) =>
-                        setFormData({ ...formData, state: e.target.value })
-                      }
-                      className="w-full bg-[#111] border border-gray-700 p-2.5 rounded text-white outline-none focus:border-[#c9a84c] disabled:opacity-50"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* --- SECTION 3: MEMBERSHIP DETAILS --- */}
-              <div>
-                <h3 className="text-lg font-bold text-[#c9a84c] mb-4 bg-[#111] p-2 rounded">
-                  Membership Details
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                   <div>
                     <label className="block text-gray-400 text-xs mb-1">
                       Membership Category *
@@ -625,12 +568,11 @@ export default function MembersDashboard() {
                         })
                       }
                       className="w-full bg-[#111] border border-gray-700 p-2.5 rounded text-white outline-none focus:border-[#c9a84c] disabled:opacity-50"
-                      placeholder="e.g. Studio"
                     />
                   </div>
                   <div>
                     <label className="block text-gray-400 text-xs mb-1">
-                      Membership Duration *
+                      Duration *
                     </label>
                     <input
                       disabled={modalMode === "view"}
@@ -644,7 +586,6 @@ export default function MembersDashboard() {
                         })
                       }
                       className="w-full bg-[#111] border border-gray-700 p-2.5 rounded text-white outline-none focus:border-[#c9a84c] disabled:opacity-50"
-                      placeholder="e.g. 5 Year"
                     />
                   </div>
                   <div>
@@ -667,7 +608,7 @@ export default function MembersDashboard() {
                   </div>
                   <div>
                     <label className="block text-gray-400 text-xs mb-1">
-                      Membership Amount (₹) *
+                      Total Membership Amt (₹) *
                     </label>
                     <input
                       disabled={modalMode === "view"}
@@ -685,7 +626,7 @@ export default function MembersDashboard() {
                   </div>
                   <div>
                     <label className="block text-gray-400 text-xs mb-1">
-                      Paid Amount (₹) *
+                      Paid Amt (₹) *
                     </label>
                     <input
                       disabled={modalMode === "view"}
@@ -700,16 +641,640 @@ export default function MembersDashboard() {
                   </div>
                   <div>
                     <label className="block text-red-400 text-xs mb-1">
-                      Due Amount (₹) - Auto Calculated
+                      Due Amt (₹)
                     </label>
                     <input
                       disabled
                       type="number"
                       value={formData.dueAmount}
-                      className="w-full bg-red-900/20 border border-red-900/50 p-2.5 rounded text-red-400 outline-none cursor-not-allowed font-bold"
+                      className="w-full bg-red-900/20 border border-red-900/50 p-2.5 rounded text-red-400 font-bold outline-none cursor-not-allowed"
                     />
                   </div>
                 </div>
+              </div>
+
+              {/* --- SECTION 3: HOLIDAY DETAILS --- */}
+              <div>
+                <div className="flex justify-between items-center mb-4 border-b border-gray-800 pb-2">
+                  <h3 className="text-lg font-bold text-[#c9a84c]">
+                    Member Holidays
+                  </h3>
+                  <div className="flex gap-4">
+                    <label className="flex items-center gap-2 text-sm text-gray-400">
+                      Total Nights:{" "}
+                      <input
+                        type="number"
+                        disabled={modalMode === "view"}
+                        value={formData.totalNights}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            totalNights: Number(e.target.value),
+                          })
+                        }
+                        className="w-16 bg-[#111] border border-gray-700 rounded p-1 text-white text-center"
+                      />
+                    </label>
+                    <label className="flex items-center gap-2 text-sm text-gray-400">
+                      Used Nights:{" "}
+                      <input
+                        type="number"
+                        disabled={modalMode === "view"}
+                        value={formData.usedNights}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            usedNights: Number(e.target.value),
+                          })
+                        }
+                        className="w-16 bg-[#111] border border-gray-700 rounded p-1 text-white text-center"
+                      />
+                    </label>
+                    <div className="text-sm font-bold text-[#c9a84c] flex items-center">
+                      Available: {formData.totalNights - formData.usedNights}
+                    </div>
+                  </div>
+                </div>
+
+                {formData.holidays.map((h, i) => (
+                  <div
+                    key={i}
+                    className="flex gap-2 items-end mb-2 bg-[#111] p-2 rounded border border-gray-800"
+                  >
+                    <div className="w-20">
+                      <label className="text-[10px] text-gray-500 block">
+                        Nights
+                      </label>
+                      <input
+                        disabled={modalMode === "view"}
+                        type="number"
+                        value={h.nights}
+                        onChange={(e) =>
+                          handleArrayChange(
+                            "holidays",
+                            i,
+                            "nights",
+                            e.target.value,
+                          )
+                        }
+                        className="w-full bg-[#1c1c1c] text-white p-2 rounded text-sm outline-none focus:border-[#c9a84c]"
+                      />
+                    </div>
+                    <div className="flex-1">
+                      <label className="text-[10px] text-gray-500 block">
+                        Check In
+                      </label>
+                      <input
+                        disabled={modalMode === "view"}
+                        type="date"
+                        value={h.checkIn}
+                        onChange={(e) =>
+                          handleArrayChange(
+                            "holidays",
+                            i,
+                            "checkIn",
+                            e.target.value,
+                          )
+                        }
+                        className="w-full bg-[#1c1c1c] text-white p-2 rounded text-sm [color-scheme:dark]"
+                      />
+                    </div>
+                    <div className="flex-1">
+                      <label className="text-[10px] text-gray-500 block">
+                        Check Out
+                      </label>
+                      <input
+                        disabled={modalMode === "view"}
+                        type="date"
+                        value={h.checkOut}
+                        onChange={(e) =>
+                          handleArrayChange(
+                            "holidays",
+                            i,
+                            "checkOut",
+                            e.target.value,
+                          )
+                        }
+                        className="w-full bg-[#1c1c1c] text-white p-2 rounded text-sm [color-scheme:dark]"
+                      />
+                    </div>
+                    <div className="flex-[2]">
+                      <label className="text-[10px] text-gray-500 block">
+                        Resort Detail
+                      </label>
+                      <input
+                        disabled={modalMode === "view"}
+                        type="text"
+                        value={h.detail}
+                        onChange={(e) =>
+                          handleArrayChange(
+                            "holidays",
+                            i,
+                            "detail",
+                            e.target.value,
+                          )
+                        }
+                        className="w-full bg-[#1c1c1c] text-white p-2 rounded text-sm outline-none"
+                        placeholder="Goa Resort..."
+                      />
+                    </div>
+                    <div className="flex-1">
+                      <label className="text-[10px] text-gray-500 block">
+                        Booked Date
+                      </label>
+                      <input
+                        disabled={modalMode === "view"}
+                        type="date"
+                        value={h.bookedDate}
+                        onChange={(e) =>
+                          handleArrayChange(
+                            "holidays",
+                            i,
+                            "bookedDate",
+                            e.target.value,
+                          )
+                        }
+                        className="w-full bg-[#1c1c1c] text-white p-2 rounded text-sm [color-scheme:dark]"
+                      />
+                    </div>
+                    {modalMode !== "view" && (
+                      <button
+                        type="button"
+                        onClick={() => removeArrayItem("holidays", i)}
+                        className="p-2 text-red-500 hover:bg-red-900/20 rounded mb-1"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    )}
+                  </div>
+                ))}
+                {modalMode !== "view" && (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      addArrayItem("holidays", {
+                        nights: "",
+                        checkIn: "",
+                        checkOut: "",
+                        detail: "",
+                        bookedDate: "",
+                      })
+                    }
+                    className="mt-2 text-sm text-[#c9a84c] flex items-center gap-1 hover:text-white"
+                  >
+                    <Plus size={14} /> Add Holiday Record
+                  </button>
+                )}
+              </div>
+
+              {/* --- SECTION 4: MEMBERSHIP PAYMENT DETAILS --- */}
+              <div>
+                <h3 className="text-lg font-bold text-[#c9a84c] mb-2 border-b border-gray-800 pb-2">
+                  Membership Payment Details
+                </h3>
+                {formData.membershipPayments.map((p, i) => (
+                  <div
+                    key={i}
+                    className="flex gap-2 items-end mb-2 bg-[#111] p-2 rounded border border-gray-800"
+                  >
+                    <div className="flex-[1.5]">
+                      <label className="text-[10px] text-gray-500 block">
+                        Receipt No.
+                      </label>
+                      <input
+                        disabled={modalMode === "view"}
+                        type="text"
+                        value={p.receiptNo}
+                        onChange={(e) =>
+                          handleArrayChange(
+                            "membershipPayments",
+                            i,
+                            "receiptNo",
+                            e.target.value,
+                          )
+                        }
+                        className="w-full bg-[#1c1c1c] text-white p-2 rounded text-sm outline-none"
+                      />
+                    </div>
+                    <div className="flex-[1]">
+                      <label className="text-[10px] text-gray-500 block">
+                        Date
+                      </label>
+                      <input
+                        disabled={modalMode === "view"}
+                        type="date"
+                        value={p.receiptDate}
+                        onChange={(e) =>
+                          handleArrayChange(
+                            "membershipPayments",
+                            i,
+                            "receiptDate",
+                            e.target.value,
+                          )
+                        }
+                        className="w-full bg-[#1c1c1c] text-white p-2 rounded text-sm [color-scheme:dark]"
+                      />
+                    </div>
+                    <div className="flex-[1]">
+                      <label className="text-[10px] text-gray-500 block">
+                        Mode
+                      </label>
+                      <input
+                        disabled={modalMode === "view"}
+                        type="text"
+                        value={p.mode}
+                        onChange={(e) =>
+                          handleArrayChange(
+                            "membershipPayments",
+                            i,
+                            "mode",
+                            e.target.value,
+                          )
+                        }
+                        className="w-full bg-[#1c1c1c] text-white p-2 rounded text-sm outline-none"
+                        placeholder="Debit Card"
+                      />
+                    </div>
+                    <div className="flex-[1.5]">
+                      <label className="text-[10px] text-gray-500 block">
+                        Bank
+                      </label>
+                      <input
+                        disabled={modalMode === "view"}
+                        type="text"
+                        value={p.bank}
+                        onChange={(e) =>
+                          handleArrayChange(
+                            "membershipPayments",
+                            i,
+                            "bank",
+                            e.target.value,
+                          )
+                        }
+                        className="w-full bg-[#1c1c1c] text-white p-2 rounded text-sm outline-none"
+                      />
+                    </div>
+                    <div className="flex-[1]">
+                      <label className="text-[10px] text-gray-500 block">
+                        Card/Chq No
+                      </label>
+                      <input
+                        disabled={modalMode === "view"}
+                        type="text"
+                        value={p.chequeOrCardNo}
+                        onChange={(e) =>
+                          handleArrayChange(
+                            "membershipPayments",
+                            i,
+                            "chequeOrCardNo",
+                            e.target.value,
+                          )
+                        }
+                        className="w-full bg-[#1c1c1c] text-white p-2 rounded text-sm outline-none"
+                      />
+                    </div>
+                    <div className="flex-[1]">
+                      <label className="text-[10px] text-gray-500 block">
+                        Type
+                      </label>
+                      <input
+                        disabled={modalMode === "view"}
+                        type="text"
+                        value={p.paymentType}
+                        onChange={(e) =>
+                          handleArrayChange(
+                            "membershipPayments",
+                            i,
+                            "paymentType",
+                            e.target.value,
+                          )
+                        }
+                        className="w-full bg-[#1c1c1c] text-white p-2 rounded text-sm outline-none"
+                      />
+                    </div>
+                    <div className="flex-[1]">
+                      <label className="text-[10px] text-gray-500 block">
+                        Amount
+                      </label>
+                      <input
+                        disabled={modalMode === "view"}
+                        type="number"
+                        value={p.amount}
+                        onChange={(e) =>
+                          handleArrayChange(
+                            "membershipPayments",
+                            i,
+                            "amount",
+                            e.target.value,
+                          )
+                        }
+                        className="w-full bg-[#1c1c1c] text-white p-2 rounded text-sm outline-none"
+                      />
+                    </div>
+                    {modalMode !== "view" && (
+                      <button
+                        type="button"
+                        onClick={() => removeArrayItem("membershipPayments", i)}
+                        className="p-2 text-red-500 hover:bg-red-900/20 rounded mb-1"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    )}
+                  </div>
+                ))}
+                {modalMode !== "view" && (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      addArrayItem("membershipPayments", {
+                        receiptNo: "",
+                        receiptDate: "",
+                        mode: "",
+                        bank: "",
+                        chequeOrCardNo: "",
+                        paymentType: "Package Amount",
+                        amount: "",
+                      })
+                    }
+                    className="mt-2 text-sm text-[#c9a84c] flex items-center gap-1 hover:text-white"
+                  >
+                    <Plus size={14} /> Add Payment Record
+                  </button>
+                )}
+              </div>
+
+              {/* --- SECTION 5: AMC PAYMENT DETAILS --- */}
+              <div>
+                <h3 className="text-lg font-bold text-[#c9a84c] mb-2 border-b border-gray-800 pb-2">
+                  AMC Payment Details
+                </h3>
+                {formData.amcPayments.map((p, i) => (
+                  <div
+                    key={i}
+                    className="flex gap-2 items-end mb-2 bg-[#111] p-2 rounded border border-gray-800"
+                  >
+                    <div className="flex-[1.5]">
+                      <label className="text-[10px] text-gray-500 block">
+                        Receipt No.
+                      </label>
+                      <input
+                        disabled={modalMode === "view"}
+                        type="text"
+                        value={p.receiptNo}
+                        onChange={(e) =>
+                          handleArrayChange(
+                            "amcPayments",
+                            i,
+                            "receiptNo",
+                            e.target.value,
+                          )
+                        }
+                        className="w-full bg-[#1c1c1c] text-white p-2 rounded text-sm outline-none"
+                      />
+                    </div>
+                    <div className="flex-[1]">
+                      <label className="text-[10px] text-gray-500 block">
+                        Date
+                      </label>
+                      <input
+                        disabled={modalMode === "view"}
+                        type="date"
+                        value={p.receiptDate}
+                        onChange={(e) =>
+                          handleArrayChange(
+                            "amcPayments",
+                            i,
+                            "receiptDate",
+                            e.target.value,
+                          )
+                        }
+                        className="w-full bg-[#1c1c1c] text-white p-2 rounded text-sm [color-scheme:dark]"
+                      />
+                    </div>
+                    <div className="flex-[1]">
+                      <label className="text-[10px] text-gray-500 block">
+                        Mode
+                      </label>
+                      <input
+                        disabled={modalMode === "view"}
+                        type="text"
+                        value={p.mode}
+                        onChange={(e) =>
+                          handleArrayChange(
+                            "amcPayments",
+                            i,
+                            "mode",
+                            e.target.value,
+                          )
+                        }
+                        className="w-full bg-[#1c1c1c] text-white p-2 rounded text-sm outline-none"
+                      />
+                    </div>
+                    <div className="flex-[1.5]">
+                      <label className="text-[10px] text-gray-500 block">
+                        Bank
+                      </label>
+                      <input
+                        disabled={modalMode === "view"}
+                        type="text"
+                        value={p.bank}
+                        onChange={(e) =>
+                          handleArrayChange(
+                            "amcPayments",
+                            i,
+                            "bank",
+                            e.target.value,
+                          )
+                        }
+                        className="w-full bg-[#1c1c1c] text-white p-2 rounded text-sm outline-none"
+                      />
+                    </div>
+                    <div className="flex-[1]">
+                      <label className="text-[10px] text-gray-500 block">
+                        Card/Chq No
+                      </label>
+                      <input
+                        disabled={modalMode === "view"}
+                        type="text"
+                        value={p.chequeOrCardNo}
+                        onChange={(e) =>
+                          handleArrayChange(
+                            "amcPayments",
+                            i,
+                            "chequeOrCardNo",
+                            e.target.value,
+                          )
+                        }
+                        className="w-full bg-[#1c1c1c] text-white p-2 rounded text-sm outline-none"
+                      />
+                    </div>
+                    <div className="flex-[1]">
+                      <label className="text-[10px] text-gray-500 block">
+                        Type
+                      </label>
+                      <input
+                        disabled={modalMode === "view"}
+                        type="text"
+                        value={p.paymentType}
+                        onChange={(e) =>
+                          handleArrayChange(
+                            "amcPayments",
+                            i,
+                            "paymentType",
+                            e.target.value,
+                          )
+                        }
+                        className="w-full bg-[#1c1c1c] text-white p-2 rounded text-sm outline-none"
+                      />
+                    </div>
+                    <div className="flex-[1]">
+                      <label className="text-[10px] text-gray-500 block">
+                        Amount
+                      </label>
+                      <input
+                        disabled={modalMode === "view"}
+                        type="number"
+                        value={p.amount}
+                        onChange={(e) =>
+                          handleArrayChange(
+                            "amcPayments",
+                            i,
+                            "amount",
+                            e.target.value,
+                          )
+                        }
+                        className="w-full bg-[#1c1c1c] text-white p-2 rounded text-sm outline-none"
+                      />
+                    </div>
+                    {modalMode !== "view" && (
+                      <button
+                        type="button"
+                        onClick={() => removeArrayItem("amcPayments", i)}
+                        className="p-2 text-red-500 hover:bg-red-900/20 rounded mb-1"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    )}
+                  </div>
+                ))}
+                {modalMode !== "view" && (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      addArrayItem("amcPayments", {
+                        receiptNo: "",
+                        receiptDate: "",
+                        mode: "",
+                        bank: "",
+                        chequeOrCardNo: "",
+                        paymentType: "AMC",
+                        amount: "",
+                      })
+                    }
+                    className="mt-2 text-sm text-[#c9a84c] flex items-center gap-1 hover:text-white"
+                  >
+                    <Plus size={14} /> Add AMC Record
+                  </button>
+                )}
+              </div>
+
+              {/* --- SECTION 6: OFFERS --- */}
+              <div>
+                <h3 className="text-lg font-bold text-[#c9a84c] mb-2 border-b border-gray-800 pb-2">
+                  Offers
+                </h3>
+                {formData.offers.map((o, i) => (
+                  <div
+                    key={i}
+                    className="flex gap-2 items-end mb-2 bg-[#111] p-2 rounded border border-gray-800"
+                  >
+                    <div className="flex-[2]">
+                      <label className="text-[10px] text-gray-500 block">
+                        Offer Details
+                      </label>
+                      <input
+                        disabled={modalMode === "view"}
+                        type="text"
+                        value={o.offerName}
+                        onChange={(e) =>
+                          handleArrayChange(
+                            "offers",
+                            i,
+                            "offerName",
+                            e.target.value,
+                          )
+                        }
+                        className="w-full bg-[#1c1c1c] text-white p-2 rounded text-sm outline-none"
+                        placeholder="1 NIGHT IN INDIA..."
+                      />
+                    </div>
+                    <div className="flex-[1]">
+                      <label className="text-[10px] text-gray-500 block">
+                        Validity Date
+                      </label>
+                      <input
+                        disabled={modalMode === "view"}
+                        type="date"
+                        value={o.validity}
+                        onChange={(e) =>
+                          handleArrayChange(
+                            "offers",
+                            i,
+                            "validity",
+                            e.target.value,
+                          )
+                        }
+                        className="w-full bg-[#1c1c1c] text-white p-2 rounded text-sm [color-scheme:dark]"
+                      />
+                    </div>
+                    <div className="flex-[1]">
+                      <label className="text-[10px] text-gray-500 block">
+                        Status
+                      </label>
+                      <select
+                        disabled={modalMode === "view"}
+                        value={o.availability}
+                        onChange={(e) =>
+                          handleArrayChange(
+                            "offers",
+                            i,
+                            "availability",
+                            e.target.value,
+                          )
+                        }
+                        className="w-full bg-[#1c1c1c] text-white p-2 rounded text-sm outline-none border border-transparent focus:border-[#c9a84c]"
+                      >
+                        <option value="Active">Active</option>
+                        <option value="Expired">Expired</option>
+                        <option value="Used">Used</option>
+                      </select>
+                    </div>
+                    {modalMode !== "view" && (
+                      <button
+                        type="button"
+                        onClick={() => removeArrayItem("offers", i)}
+                        className="p-2 text-red-500 hover:bg-red-900/20 rounded mb-1"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    )}
+                  </div>
+                ))}
+                {modalMode !== "view" && (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      addArrayItem("offers", {
+                        offerName: "",
+                        validity: "",
+                        availability: "Active",
+                      })
+                    }
+                    className="mt-2 text-sm text-[#c9a84c] flex items-center gap-1 hover:text-white"
+                  >
+                    <Plus size={14} /> Add Offer
+                  </button>
+                )}
               </div>
 
               {/* SUBMIT BUTTON */}

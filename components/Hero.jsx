@@ -1,172 +1,187 @@
 "use client";
 
-import Image from "next/image";
-import { motion, AnimatePresence } from "framer-motion";
-import { useState, useEffect } from "react";
-
-const slides = [
-  {
-    subtitle: "Get unforgetable pleasure with us",
-    title: ["Explore beauty of", "the whole world"],
-    bgLeft:
-      "https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=1400&q=80",
-    bgRight:
-      "https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=1200&q=80",
-  },
-  {
-    subtitle: "Luxury stays at breathtaking destinations",
-    title: ["Discover hidden", "paradises"],
-    bgLeft:
-      "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=1400&q=80",
-    bgRight:
-      "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=1200&q=80",
-  },
-  {
-    subtitle: "Your journey begins with a single step",
-    title: ["Travel beyond", "your imagination"],
-    bgLeft:
-      "https://images.unsplash.com/photo-1506929562872-bb421503ef21?w=1400&q=80",
-    bgRight:
-      "https://images.unsplash.com/photo-1445019980597-93fa8acb246c?w=1200&q=80",
-  },
-];
+import { motion } from "framer-motion";
+import { MoveDownRight, MoveUp, MoveUpRight, Play } from "lucide-react";
 
 export default function Hero() {
-  const [current, setCurrent] = useState(0);
+  // Stagger animation variants for text reveal
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.2,
+        delayChildren: 0.5,
+      },
+    },
+  };
 
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrent((prev) => (prev + 1) % slides.length);
-    }, 4500);
-    return () => clearInterval(timer);
-  }, []);
-
-  const slide = slides[current];
+  const textRevealVariants = {
+    hidden: { y: "120%", opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: { duration: 1.2, ease: [0.16, 1, 0.3, 1] }, // Ultra smooth cubic bezier
+    },
+  };
 
   return (
-    <section
-      className="relative w-full overflow-hidden pt-20"
-      style={{ height: "100vh", minHeight: "600px" }}
-    >
-      {/* ── Left BG: animates per slide ── */}
-      <AnimatePresence mode="sync">
-        <motion.div
-          key={`left-bg-${current}`}
-          className="absolute inset-0 w-full h-full bg-cover bg-center z-0"
-          style={{ backgroundImage: `url('${slide.bgLeft}')` }}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 1, ease: "easeInOut" }}
-        >
-          <div className="absolute inset-0 bg-black/30" />
-        </motion.div>
-      </AnimatePresence>
-
-      {/* ── Right BG: animates per slide (diagonal clip) ── */}
-      <AnimatePresence mode="sync">
-        <motion.div
-          key={`right-bg-${current}`}
-          className="absolute top-0 right-0 h-full bg-cover bg-center z-10"
-          style={{
-            width: "58%",
-            backgroundImage: `url('${slide.bgRight}')`,
-            clipPath: "polygon(18% 0%, 100% 0%, 100% 100%, 0% 100%)",
-          }}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 1, ease: "easeInOut" }}
-        >
-          <div className="absolute inset-0 bg-black/20" />
-        </motion.div>
-      </AnimatePresence>
-
-      {/* ── Right Panel: Logo (same diagonal clip, always visible) ── */}
-      {/* <div
-        className="absolute top-0 right-0 h-full z-20 flex items-center justify-center"
-        style={{
-          width: "58%",
-          clipPath: "polygon(18% 0%, 100% 0%, 100% 100%, 0% 100%)",
-          paddingLeft: "13%",
-        }}
+    <section className="relative w-full h-screen min-h-[700px] overflow-hidden bg-black flex items-center justify-center">
+      {/* ── 1. CINEMATIC SLOW ZOOM BACKGROUND VIDEO ── */}
+      <motion.div
+        initial={{ scale: 1.15 }}
+        animate={{ scale: 1 }}
+        transition={{ duration: 12, ease: "easeOut" }}
+        className="absolute inset-0 w-full h-full z-0"
       >
-        <div className="flex flex-col items-center text-center">
-          <Image
-            src="/images/logo-no-bg.png"
-            alt="Stellar Luxury Vacations"
-            width={160}
-            height={160}
-            className="object-contain h-80 w-80"
-            priority
-          />
-        </div>
-      </div> */}
+        <video
+          src="/videos/3.mp4" /* Tumhara video path */
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="w-full h-full object-cover"
+        />
+      </motion.div>
 
-      {/* ── Vertical Divider Lines ── */}
-      <div className="absolute right-14 top-1/2 -translate-y-1/2 z-30 flex flex-col gap-2">
-        <span className="block w-0.5 h-10 bg-white/50" />
-        <span className="block w-0.5 h-10 bg-white/50" />
+      {/* ── 2. VIGNETTE & MOVIE-STYLE GRADIENT OVERLAY ── */}
+      <div className="absolute inset-0 z-10 bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,0,0,0.6)_100%)]" />
+      <div className="absolute inset-0 z-10 bg-gradient-to-b from-black/60 via-transparent to-black/90" />
+
+      {/* ── 3. EDITORIAL VERTICAL ACCENTS (Left & Right) ── */}
+      <div className="absolute left-8 top-1/2 -translate-y-1/2 z-30 hidden lg:flex flex-col items-center gap-12">
+        <span className="text-[10px] text-white/50 tracking-[0.3em] -rotate-90 uppercase font-medium whitespace-nowrap">
+          Est. 2026
+        </span>
+        <div className="w-[1px] h-24 bg-white/20" />
       </div>
 
-      {/* ── Left Text Content ── */}
-      <div
-        className="absolute left-0 top-0 h-full z-30 flex flex-col justify-center pl-16"
-        style={{ width: "48%" }}
-      >
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={`text-${current}`}
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -30 }}
-            transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
-            className="flex flex-col"
-          >
-            {/* Subtitle */}
+      <div className="absolute right-8 top-1/2 -translate-y-1/2 z-30 hidden lg:flex flex-col items-center gap-12">
+        <div className="w-[1px] h-24 bg-white/20" />
+        <span className="text-[10px] text-white/50 tracking-[0.3em] -rotate-90 uppercase font-medium whitespace-nowrap">
+          Worldwide
+        </span>
+      </div>
+
+      {/* ── 4. MAIN LUXURY CONTENT ── */}
+      <div className="relative z-20 flex flex-col items-center text-center w-full px-6 mt-20">
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+          className="flex flex-col items-center"
+        >
+          {/* Overline with golden dot */}
+          <div className="overflow-hidden mb-6">
+            <motion.div
+              variants={textRevealVariants}
+              className="flex items-center gap-4"
+            >
+              <span className="w-8 h-[1px] bg-[#c9a84c]" />
+              <p className="text-[#c9a84c] text-[10px] md:text-xs font-semibold tracking-[0.4em] uppercase">
+                Stellar Luxury Vacations
+              </p>
+              <span className="w-8 h-[1px] bg-[#c9a84c]" />
+            </motion.div>
+          </div>
+
+          {/* Huge Masked Title */}
+          <div className="overflow-hidden">
+            <motion.h1
+              variants={textRevealVariants}
+              className="text-5xl md:text-7xl lg:text-[100px] text-white font-bold tracking-tighter leading-[0.9]"
+            >
+              ESCAPE THE
+            </motion.h1>
+          </div>
+          <div className="overflow-hidden mb-8 md:mb-12 py-2">
+            <motion.h1
+              variants={textRevealVariants}
+              className="text-5xl md:text-7xl lg:text-[100px] text-white font-light italic font-serif leading-[0.9] text-white/90"
+            >
+              Ordinary
+            </motion.h1>
+          </div>
+
+          {/* Description */}
+          <div className="overflow-hidden mb-12">
             <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.1, ease: "easeOut" }}
-              className="text-white/90 text-[15px] font-normal tracking-wide mb-4"
+              variants={textRevealVariants}
+              className="text-white text-sm md:text-base max-w-lg mx-auto font-light leading-relaxed tracking-wide"
             >
-              {slide.subtitle}
+              We craft bespoke journeys for the discerning traveler. Uncover the
+              world’s most pristine destinations with unparalleled elegance and
+              world-class hospitality.
             </motion.p>
+          </div>
 
-            {/* Title lines */}
-            {slide.title.map((line, i) => (
-              <motion.span
-                key={i}
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{
-                  duration: 0.55,
-                  delay: 0.18 + i * 0.1,
-                  ease: [0.22, 1, 0.36, 1],
-                }}
-                className="text-white font-extrabold leading-[1.05] block"
-                style={{ fontSize: "clamp(42px, 5.2vw, 72px)" }}
-              >
-                {line}
-              </motion.span>
-            ))}
-
-            {/* Explore Button */}
-            <motion.a
-              href="#"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.42, ease: "easeOut" }}
-              className="mt-10 inline-flex items-center justify-center w-44 h-[52px]
-                         bg-[#111111] text-white text-[15px] font-semibold tracking-wide
-                         rounded-full hover:bg-[#2a2a2a] hover:scale-105
-                         transition-all duration-200"
+          {/* Interactive Luxury Button */}
+          <motion.div
+            variants={textRevealVariants}
+            className="flex flex-col sm:flex-row items-center gap-6"
+          >
+            <a
+              href="/india"
+              className="group relative px-8 py-4 flex items-center gap-3 overflow-hidden bg-white/5 backdrop-blur-sm border border-white/10 text-white rounded-full hover:border-[#c9a84c] transition-all duration-500"
             >
-              Explore
-            </motion.a>
+              {/* Button Hover Fill Effect */}
+              <span className="absolute inset-0 bg-[#c9a84c] translate-y-[100%] group-hover:translate-y-0 transition-transform duration-500 ease-in-out" />
+
+              <span className="relative z-10 text-xs font-medium tracking-[0.2em] uppercase group-hover:text-black transition-colors duration-500">
+                Discover More
+              </span>
+              <MoveUpRight
+                size={14}
+                className="relative z-10 group-hover:text-black transition-colors duration-500"
+              />
+            </a>
           </motion.div>
-        </AnimatePresence>
+        </motion.div>
       </div>
+
+      {/* ── 5. BOTTOM GLASS WIDGET & SCROLL INDICATOR ── */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 1, delay: 2 }}
+        className="absolute bottom-0 left-0 w-full px-8 pb-8 flex justify-between items-end z-30"
+      >
+        {/* Left Widget */}
+        <div className="hidden md:flex flex-col gap-1 backdrop-blur-md bg-black/20 p-4 border border-white/10 rounded-lg">
+          <span className="text-[#c9a84c] text-[10px] uppercase tracking-widest font-bold">
+            Concierge
+          </span>
+          <span className="text-white text-xs font-light tracking-wide">
+            Available 24/7 for Members
+          </span>
+        </div>
+
+        {/* Scroll Line */}
+        <div className="flex flex-col items-center gap-4 absolute left-1/2 -translate-x-1/2 bottom-8">
+          <span className="text-[9px] text-white/50 uppercase tracking-[0.3em]">
+            Scroll
+          </span>
+          <div className="w-[1px] h-12 bg-white/20 overflow-hidden relative">
+            <div className="w-full h-1/2 bg-[#c9a84c] animate-slide-down absolute top-0" />
+          </div>
+        </div>
+      </motion.div>
+
+      {/* Global Style for the scroll line animation */}
+      <style
+        dangerouslySetInnerHTML={{
+          __html: `
+        @keyframes slide-down {
+          0% { transform: translateY(-100%); }
+          50% { transform: translateY(200%); }
+          100% { transform: translateY(200%); }
+        }
+        .animate-slide-down {
+          animation: slide-down 2s cubic-bezier(0.7, 0, 0.3, 1) infinite;
+        }
+      `,
+        }}
+      />
     </section>
   );
 }

@@ -25,7 +25,6 @@ const verifyAdmin = (req) => {
 export async function GET(req) {
   try {
     await dbConnect();
-
     verifyAdmin(req);
 
     const { searchParams } = new URL(req.url);
@@ -72,34 +71,37 @@ export async function GET(req) {
 export async function POST(req) {
   try {
     await dbConnect();
-
     verifyAdmin(req);
 
     const data = await req.json();
 
-    if (!data.password || !data.name || !data.phone) {
-      return errorResponse("Password, Name, and Phone are required.", 400);
+    // 👉 YAHAN FIX KIYA HAI: Ab packageId (Membership ID) dena zaroori hai
+    if (!data.packageId || !data.password || !data.name || !data.phone) {
+      return errorResponse(
+        "Package ID, Password, Name, and Phone are required.",
+        400,
+      );
     }
 
-    let newPackageId;
-    let isUnique = false;
-    while (!isUnique) {
-      const randomNum = Math.floor(1000000 + Math.random() * 9000000);
-      newPackageId = `CIH${randomNum}`;
-      const existingId = await Member.findOne({ packageId: newPackageId });
-      if (!existingId) {
-        isUnique = true;
-      }
+    // 👉 YAHAN CHECK KIYA HAI: Ensure the manually entered Package ID is unique
+    const existingMember = await Member.findOne({ packageId: data.packageId });
+    if (existingMember) {
+      return errorResponse(
+        "This Package ID already exists. Please use a unique ID.",
+        400,
+      );
     }
-    data.packageId = newPackageId;
 
+    // Password Hashing
     const salt = await bcrypt.genSalt(10);
     data.password = await bcrypt.hash(data.password, salt);
 
+    // Amount Calculation
     const membershipAmount = Number(data.membershipAmount) || 0;
     const paidAmount = Number(data.paidAmount) || 0;
     data.dueAmount = membershipAmount - paidAmount;
 
+    // Create Member (This will automatically save the new holiday/payment arrays if provided in frontend)
     const member = await Member.create(data);
     return successResponse(member, 201);
   } catch (error) {
@@ -115,7 +117,6 @@ export async function POST(req) {
 export async function PUT(req) {
   try {
     await dbConnect();
-
     verifyAdmin(req);
 
     const { searchParams } = new URL(req.url);
@@ -124,6 +125,7 @@ export async function PUT(req) {
 
     const data = await req.json();
 
+    // Password Update Logic
     if (data.password && data.password.trim() !== "") {
       const salt = await bcrypt.genSalt(10);
       data.password = await bcrypt.hash(data.password, salt);
@@ -131,12 +133,15 @@ export async function PUT(req) {
       delete data.password;
     }
 
+    // Prevent changing Package ID during update to avoid conflicts (Optional: Remove this line if you want to allow editing Package ID later)
     delete data.packageId;
 
+    // Amount Calculation
     const membershipAmount = Number(data.membershipAmount) || 0;
     const paidAmount = Number(data.paidAmount) || 0;
     data.dueAmount = membershipAmount - paidAmount;
 
+    // Update Member (This will overwrite the holiday/payment arrays with whatever frontend sends)
     const updatedMember = await Member.findByIdAndUpdate(id, data, {
       new: true,
     });
@@ -159,7 +164,6 @@ export async function PUT(req) {
 export async function DELETE(req) {
   try {
     await dbConnect();
-
     verifyAdmin(req);
 
     const { searchParams } = new URL(req.url);
